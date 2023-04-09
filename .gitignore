@@ -1,17 +1,19 @@
 #####################
 #Unreal Generated Files#
 ####################
-*/Build
-*/Binaries
-*/DerivedDataCache
-*/Intermediate
-*/Saved
+/Build
+/Binaries
+/DerivedDataCache
+/Intermediate
+/Saved
+*.sln
 
 
 ##################
 #VS Generated Files#
 #################
-*/.vs
+.vs/
+.vsconfig
 
 
 ##################
@@ -24,3 +26,4 @@
 # Optional #
 #################
 /Plugins
+/Platforms
