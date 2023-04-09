@@ -1,0 +1,26 @@
+#####################
+#Unreal Generated Files#
+####################
+*/Build
+*/Binaries
+*/DerivedDataCache
+*/Intermediate
+*/Saved
+
+
+##################
+#VS Generated Files#
+#################
+*/.vs
+
+
+##################
+#용량 이슈로 인한 제외#
+#################
+*_BuiltData.uasset
+
+
+##################
+# Optional #
+#################
+/Plugins
