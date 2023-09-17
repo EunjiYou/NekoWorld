@@ -3,6 +3,7 @@
 using UnrealBuildTool;
 using System.Collections.Generic;
 
+// [23/09/18] 새로 추가된 NekoWorldEditorModule과는 무관함
 public class NekoWorldEditorTarget : TargetRules
 {
 	public NekoWorldEditorTarget(TargetInfo Target) : base(Target)
@@ -10,6 +11,6 @@ public class NekoWorldEditorTarget : TargetRules
 		Type = TargetType.Editor;
 		DefaultBuildSettings = BuildSettingsVersion.V2;
 
-		ExtraModuleNames.AddRange( new string[] { "NekoWorld" } );
+		ExtraModuleNames.AddRange( new string[] { "NekoWorld", "NekoWorldEditor" } );
 	}
 }

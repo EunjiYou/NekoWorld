@@ -10,6 +10,6 @@ public class NekoWorldTarget : TargetRules
 		Type = TargetType.Game;
 		DefaultBuildSettings = BuildSettingsVersion.V2;
 
-		ExtraModuleNames.AddRange( new string[] { "NekoWorld" } );
+		ExtraModuleNames.AddRange( new string[] { "NekoWorld", "NekoWorldEditor" } );
 	}
 }
