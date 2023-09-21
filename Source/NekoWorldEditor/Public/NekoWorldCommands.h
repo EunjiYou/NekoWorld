@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "NekoWorldSlateStyle.h"
 
 /**
  *  Slate 메뉴, 툴바에게 지정해줄 명령(Command)
@@ -16,7 +17,7 @@ public:
 			TEXT("NekoWorld"), 
 			NSLOCTEXT("NekoWorld", "NekoWorld", "NekoWorld"), 
 			NAME_None, 
-			TEXT("Default"))
+			FNekoWorldSlateStyle::GetStyleSetName())
 	{
 		
 	}

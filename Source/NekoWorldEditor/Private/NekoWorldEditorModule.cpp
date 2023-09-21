@@ -4,6 +4,7 @@
 
 #include "NekoWorldCommands.h"
 #include "LevelEditor.h"
+#include "NekoWorldSlateStyle.h"
 
 IMPLEMENT_MODULE(FNekoWorldEditorModule, NekoWorldEditor);
 
@@ -11,6 +12,10 @@ IMPLEMENT_MODULE(FNekoWorldEditorModule, NekoWorldEditor);
 
 void FNekoWorldEditorModule::StartupModule()
 {
+	// Register Style
+	FNekoWorldSlateStyle::Initialize();
+	FNekoWorldSlateStyle::ReloadTextures();
+
 	// Register Command
 	FNekoWorldCommands::Register();
 
@@ -26,12 +31,22 @@ void FNekoWorldEditorModule::StartupModule()
 	{
 		static void CreateNekoWorldToolbar(FToolBarBuilder& ToolbarBuilder)
 		{
-			ToolbarBuilder.BeginSection("NekoToolbar");
+			ToolbarBuilder.BeginSection("NekoWorldToolbar");
 			{
 				ToolbarBuilder.AddToolBarButton(FNekoWorldCommands::Get().Command1);
 				ToolbarBuilder.AddToolBarButton(FNekoWorldCommands::Get().Command2);
 				ToolbarBuilder.AddToolBarButton(FNekoWorldCommands::Get().Command3);
 				ToolbarBuilder.AddToolBarButton(FNekoWorldCommands::Get().Command4);
+
+				// 수동 스타일 지정
+				//ToolbarBuilder.AddToolBarButton(FNekoWorldCommands::Get().Command1,
+				//	NAME_None, TAttribute<FText>(), TAttribute<FText>(), FSlateIcon(FNekoWorldSlateStyle::GetStyleSetName(), "NekoWorldToolbarIcon.Command1"), NAME_None);
+				//ToolbarBuilder.AddToolBarButton(FNekoWorldCommands::Get().Command2,
+				//	NAME_None, TAttribute<FText>(), TAttribute<FText>(), FSlateIcon(FNekoWorldSlateStyle::GetStyleSetName(), "NekoWorldToolbarIcon.Command2"), NAME_None);
+				//ToolbarBuilder.AddToolBarButton(FNekoWorldCommands::Get().Command3,
+				//	NAME_None, TAttribute<FText>(), TAttribute<FText>(), FSlateIcon(FNekoWorldSlateStyle::GetStyleSetName(), "NekoWorldToolbarIcon.Command3"), NAME_None);
+				//ToolbarBuilder.AddToolBarButton(FNekoWorldCommands::Get().Command4,
+				//	NAME_None, TAttribute<FText>(), TAttribute<FText>(), FSlateIcon(FNekoWorldSlateStyle::GetStyleSetName(), "NekoWorldToolbarIcon.Command4"), NAME_None);
 			}
 			ToolbarBuilder.EndSection();
 		}
@@ -89,7 +104,11 @@ void FNekoWorldEditorModule::StartupModule()
 
 void FNekoWorldEditorModule::ShutdownModule()
 {
+	// UnRegister Commands
 	FNekoWorldCommands::Unregister();
+
+	// UnRegister Style
+	FNekoWorldSlateStyle::Shutdown();
 }
 
 #undef LOCTEXT_NAMESPACE
