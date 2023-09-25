@@ -4,6 +4,8 @@
 #include "NekoWorldCommands.h"
 
 #include "Misc/MessageDialog.h"
+#include "NekoWorldAssetEditor.h"
+#include "NekoWorldAsset.h"
 
 #define LOCTEXT_NAMESPACE "NekoCommand"
 
@@ -27,7 +29,11 @@ void FNekoWorldActions::Action2()
 
 void FNekoWorldActions::Action3()
 {
-	FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("NekoCommand", "Neko Editor Extension Action 3 Message"));
+	//FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("NekoCommand", "Neko Editor Extension Action 3 Message"));
+
+	// Editor Open
+	TSharedRef<FNekoWorldAssetEditor> NewNekoWorldAssetEditor(new FNekoWorldAssetEditor());
+	NewNekoWorldAssetEditor->InitNekoWorldAssetEditor(EToolkitMode::Standalone, TSharedPtr<IToolkitHost>(), NewObject<UNekoWorldAsset>());
 }
 
 #undef LOCTEXT_NAMESPACE

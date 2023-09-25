@@ -13,7 +13,15 @@ public class NekoWorldEditor : ModuleRules
             "Core", "CoreUObject", "Engine", "InputCore",
 			
 			// For Slate UI
-			"PropertyEditor", "Slate", "SlateCore"
+			"PropertyEditor", "Slate", "SlateCore",
+
+            // ** IToolkit override에 필요한 모듈들
+            "UnrealEd",		// 언리얼 엔진에 통합되어 있는 통합 개발 툴셋
+            "LevelEditor",
+			// **
+
+			// My Runtime Module
+			"NekoWorld"
         });
 	}
 }
