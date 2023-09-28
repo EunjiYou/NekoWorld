@@ -16,6 +16,18 @@ const FName FNekoWorldAssetEditor::DetailTabId = FName(TEXT("NekoWorldAsset Deta
 
 void FNekoWorldAssetEditor::InitNekoWorldAssetEditor(const EToolkitMode::Type Mode, const TSharedPtr<class IToolkitHost>& InitToolkitHost, class UNekoWorldAsset* InAsset)
 {
+	InAsset->SetFlags(RF_Transactional); // Redo, Undo 지원
+	NekoWorldAsset = InAsset;
+
+	// PropertyEditor Module로 Detail View 생성
+	FPropertyEditorModule& PropertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
+	FDetailsViewArgs DetailsViewArgs;
+	DetailsViewArgs.bUpdatesFromSelection = false;
+	DetailsViewArgs.bLockable = false;
+	DetailsViewArgs.NameAreaSettings = FDetailsViewArgs::ObjectsUseNameArea;
+	DetailsView = PropertyEditorModule.CreateDetailView(DetailsViewArgs);
+
+
 	// 툴바가 들어갈 기본 레이아웃 설계
 	const TSharedRef<FTabManager::FLayout> EditorDefaultLayout = FTabManager::NewLayout("Neko_Layout_v2")
 		->AddArea
@@ -51,10 +63,17 @@ void FNekoWorldAssetEditor::InitNekoWorldAssetEditor(const EToolkitMode::Type Mo
 	const bool bCreateDefaultStandaloneMenu = true;
 	const bool bCreateDefaultToolbar = true;
 	FAssetEditorToolkit::InitAssetEditor(Mode, InitToolkitHost, NekoWorldEditorAppIdentifier, EditorDefaultLayout, bCreateDefaultStandaloneMenu, bCreateDefaultToolbar, InAsset);
+
+	// Detail View에 객체 지정
+	if (DetailsView.IsValid())
+	{
+		DetailsView->SetObject(NekoWorldAsset);
+	}
 }
 
 FNekoWorldAssetEditor::~FNekoWorldAssetEditor()
 {
+	DetailsView.Reset();
 }
 
 TSharedRef<SDockTab> FNekoWorldAssetEditor::SpawnTab_Viewport(const FSpawnTabArgs& Args)
@@ -66,7 +85,10 @@ TSharedRef<SDockTab> FNekoWorldAssetEditor::SpawnTab_Viewport(const FSpawnTabArg
 TSharedRef<SDockTab> FNekoWorldAssetEditor::SpawnTab_Detail(const FSpawnTabArgs& Args)
 {
 	check(Args.GetTabId() == DetailTabId);
-	return SNew(SDockTab);
+	return SNew(SDockTab)
+		[
+			DetailsView.ToSharedRef()
+		];
 }
 
 void FNekoWorldAssetEditor::RegisterTabSpawners(const TSharedRef<class FTabManager>& InTabManager)

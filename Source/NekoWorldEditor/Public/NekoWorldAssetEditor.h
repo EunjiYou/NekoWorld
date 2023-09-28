@@ -42,4 +42,10 @@ private:
 	// 에디터 내 Tab들의 고유 명칭
 	static const FName ViewportTabId;
 	static const FName DetailTabId;
+
+	// Detail View
+	TSharedPtr<IDetailsView> DetailsView;
+
+	// 편집할 Object
+	UNekoWorldAsset* NekoWorldAsset;
 };
