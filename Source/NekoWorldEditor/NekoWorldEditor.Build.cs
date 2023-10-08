@@ -20,6 +20,10 @@ public class NekoWorldEditor : ModuleRules
             "LevelEditor",
 			// **
 
+			// For Custom Viewport
+			"AdvancedPreviewScene",
+			//
+
 			// My Runtime Module
 			"NekoWorld"
         });

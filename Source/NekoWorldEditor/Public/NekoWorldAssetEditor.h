@@ -6,9 +6,9 @@
 
 #include "Toolkits/AssetEditorToolkit.h"
 
-/**
- * 
- */
+
+class SNekoWorldViewport;
+
 class FNekoWorldAssetEditor : public FAssetEditorToolkit
 {
 public:
@@ -48,4 +48,7 @@ private:
 
 	// ฦํมýวา Object
 	UNekoWorldAsset* NekoWorldAsset;
+
+	// Viewport
+	TSharedPtr<SNekoWorldViewport> Viewport;
 };

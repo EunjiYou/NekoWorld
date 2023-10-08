@@ -5,6 +5,7 @@
 
 #include "NekoWorldAsset.h"
 #include "NekoWorldSlateStyle.h"
+#include "SNekoWorldViewport.h"
 
 
 const FName FNekoWorldAssetEditor::NekoWorldEditorAppIdentifier = FName(TEXT("NekoWorldEditorApp"));
@@ -26,6 +27,11 @@ void FNekoWorldAssetEditor::InitNekoWorldAssetEditor(const EToolkitMode::Type Mo
 	DetailsViewArgs.bLockable = false;
 	DetailsViewArgs.NameAreaSettings = FDetailsViewArgs::ObjectsUseNameArea;
 	DetailsView = PropertyEditorModule.CreateDetailView(DetailsViewArgs);
+
+	// Viewport 생성
+	Viewport = SNew(SNekoWorldViewport)
+		.ParentNekoWorldAssetEditor(SharedThis(this))
+		.ObjectToEdit(NekoWorldAsset);
 
 
 	// 툴바가 들어갈 기본 레이아웃 설계
@@ -79,7 +85,10 @@ FNekoWorldAssetEditor::~FNekoWorldAssetEditor()
 TSharedRef<SDockTab> FNekoWorldAssetEditor::SpawnTab_Viewport(const FSpawnTabArgs& Args)
 {
 	check(Args.GetTabId() == ViewportTabId);
-	return SNew(SDockTab);
+	return SNew(SDockTab)
+		[
+			Viewport.ToSharedRef()
+		];
 }
 
 TSharedRef<SDockTab> FNekoWorldAssetEditor::SpawnTab_Detail(const FSpawnTabArgs& Args)
