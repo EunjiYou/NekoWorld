@@ -22,10 +22,10 @@ public:
 
 	void Construct(const FArguments& InArgs);
 	SNekoWorldViewport();
-	~SNekoWorldViewport();
+	~SNekoWorldViewport() override;
 
 
-	// FGCObject ÀÎÅÍÆäÀÌ½º. UObject°¡ ¾Æ´Ï¾îµµ GC È¸¼ö °¡´É
+	// FGCObject ì¸í„°í˜ì´ìŠ¤. UObjectê°€ ì•„ë‹ˆì–´ë„ GC íšŒìˆ˜ ê°€ëŠ¥
 	virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
 
 protected:

@@ -36,19 +36,19 @@ public:
 	}
 
 private:
-	// ¿¡µğÅÍ°¡ »ç¿ëÇÒ °íÀ¯ ¾Û ¸íÄª
+	// ì—ë””í„°ê°€ ì‚¬ìš©í•  ê³ ìœ  ì•± ëª…ì¹­
 	static const FName NekoWorldEditorAppIdentifier;
 
-	// ¿¡µğÅÍ ³» TabµéÀÇ °íÀ¯ ¸íÄª
+	// ì—ë””í„° ë‚´ Tabë“¤ì˜ ê³ ìœ  ëª…ì¹­
 	static const FName ViewportTabId;
 	static const FName DetailTabId;
 
 	// Detail View
 	TSharedPtr<IDetailsView> DetailsView;
 
-	// ÆíÁıÇÒ Object
+	// í¸ì§‘í•  Object
 	UNekoWorldAsset* NekoWorldAsset;
 
 	// Viewport
-	TSharedPtr<SNekoWorldViewport> Viewport;
+	// TSharedPtr<SNekoWorldViewport> Viewport;
 };
