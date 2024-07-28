@@ -10,7 +10,8 @@ public class NekoWorld : ModuleRules
 	
 		PublicDependencyModuleNames.AddRange(new string[]
         {
-            "Core", "CoreUObject", "Engine", "InputCore"
+            "Core", "CoreUObject", "Engine", "InputCore",
+            "EnhancedInput"
         });
 
 		PrivateDependencyModuleNames.AddRange(new string[]
