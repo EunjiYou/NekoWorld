@@ -11,9 +11,10 @@ class UInputAction;
 class UCameraComponent;
 class USpringArmComponent;
 struct FInputActionValue;
+class UNStateMachineComponent;
 
 UCLASS()
-class NEKOWORLD_API ANCharacter : public ACharacter
+class ANCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
@@ -24,14 +25,16 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	void MoveCharacter(const FVector2D MovementVector);
+	void JumpCharacter();
+	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 private:
-	void OnInputMove(const FInputActionValue& Value);
 	void OnInputLook(const FInputActionValue& Value);
-	void OnInputJump(const FInputActionValue& Value);
+	
 	void OnInputJumpEnd(const FInputActionValue& Value);
 	
 private:
@@ -40,6 +43,9 @@ private:
 	
 	UPROPERTY(VisibleAnywhere)
 	UCameraComponent* CameraComponent;
+
+	UPROPERTY(VisibleAnyWhere)
+	UNStateMachineComponent* StateMachineComponent;
 	
 	UInputMappingContext* IMC_Default;
 	

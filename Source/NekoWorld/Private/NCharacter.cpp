@@ -2,12 +2,15 @@
 
 
 #include "NCharacter.h"
-#include "EnhancedInputComponent.h"
-#include "EnhancedInputSubsystems.h"
 #include "InputMappingContext.h"
 #include "InputAction.h"
+#include "NInputSubsystem.h"
+#include "NStateMachineComponent.h"
 #include "Camera/CameraComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Kismet/KismetMathLibrary.h"
+
 
 // Sets default values
 ANCharacter::ANCharacter()
@@ -38,6 +41,13 @@ ANCharacter::ANCharacter()
 	
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>("CameraComp");
 	CameraComponent->SetupAttachment(SpringArmComponent);
+
+	// State Machine
+	StateMachineComponent = CreateDefaultSubobject<UNStateMachineComponent>("StateMachineComp");
+
+	// Movement Setting
+	bUseControllerRotationYaw = false;
+	GetCharacterMovement()->bOrientRotationToMovement = true;
 
 	// 입력 설정
 	static ConstructorHelpers::FObjectFinder<UInputMappingContext> imcDefault(TEXT("/Game/ThirdPerson/Input/IMC_Default.IMC_Default"));
@@ -70,11 +80,12 @@ void ANCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if(APlayerController* pc = Cast<APlayerController>(Controller))
+	if(UNInputSubsystem* inputSubsystem = GetGameInstance()->GetSubsystem<UNInputSubsystem>())
 	{
-		if(UEnhancedInputLocalPlayerSubsystem* subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(pc->GetLocalPlayer()))
+		if(APlayerController* pc = Cast<APlayerController>(Controller))
 		{
-			subsystem->AddMappingContext(IMC_Default, 0);
+			inputSubsystem->RegisterInputMappingContext(pc->GetLocalPlayer());
+			inputSubsystem->EventInputLook.AddUObject(this, &ANCharacter::OnInputLook);
 		}
 	}
 }
@@ -83,23 +94,21 @@ void ANCharacter::BeginPlay()
 void ANCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-	
-	if(UEnhancedInputComponent* eiComp = Cast<UEnhancedInputComponent>(PlayerInputComponent))
+
+	if(UNInputSubsystem* inputSubsystem = GetGameInstance()->GetSubsystem<UNInputSubsystem>())
 	{
-		eiComp->BindAction(IA_Move, ETriggerEvent::Triggered, this, &ANCharacter::OnInputMove);
-		eiComp->BindAction(IA_Jump, ETriggerEvent::Triggered, this, &ANCharacter::OnInputJump);
-		eiComp->BindAction(IA_Jump, ETriggerEvent::Canceled, this, &ANCharacter::OnInputJumpEnd);
-		eiComp->BindAction(IA_Look, ETriggerEvent::Triggered, this, &ANCharacter::OnInputLook);
+		inputSubsystem->BindInputAction(PlayerInputComponent);
 	}
 }
 
-void ANCharacter::OnInputMove(const FInputActionValue& Value)
+void ANCharacter::MoveCharacter(const FVector2D MovementVector)
 {
-	FVector2D movementVector = Value.Get<FVector2D>();
-	float movementScale = FMath::Max(1.0f, movementVector.SquaredLength());
-	FVector moveDir = GetActorForwardVector() * movementVector.Y + GetActorRightVector() * movementVector.X;
-	// FVector moveDir = FVector(movementVector.Y, movementVector.X, 0.f);
-	AddMovementInput(moveDir, movementScale);
+	FRotator controlRotation = FRotator(0.f, GetControlRotation().Yaw, 0.f);
+	FVector moveDirX = UKismetMathLibrary::GetForwardVector(controlRotation) * MovementVector.Y;
+	FVector moveDirY = UKismetMathLibrary::GetRightVector(controlRotation) * MovementVector.X;
+	FVector resultMoveDir = moveDirX + moveDirY;
+	DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + (resultMoveDir * 100.0f), FColor::Red, false, 1.0f);
+	AddMovementInput(resultMoveDir, 1.f);
 }
 
 void ANCharacter::OnInputLook(const FInputActionValue& Value)
@@ -109,7 +118,7 @@ void ANCharacter::OnInputLook(const FInputActionValue& Value)
 	AddControllerPitchInput(lookVector.Y);
 }
 
-void ANCharacter::OnInputJump(const FInputActionValue& Value)
+void ANCharacter::JumpCharacter()
 {
 	Jump();
 }
