@@ -35,8 +35,6 @@ protected:
 private:
 	void OnInputLook(const FInputActionValue& Value);
 	
-	void OnInputJumpEnd(const FInputActionValue& Value);
-	
 private:
 	UPROPERTY(VisibleAnywhere)
 	USpringArmComponent* SpringArmComponent;
@@ -46,10 +44,4 @@ private:
 
 	UPROPERTY(VisibleAnyWhere)
 	UNStateMachineComponent* StateMachineComponent;
-	
-	UInputMappingContext* IMC_Default;
-	
-	UInputAction* IA_Look;
-	UInputAction* IA_Move;
-	UInputAction* IA_Jump;
 };

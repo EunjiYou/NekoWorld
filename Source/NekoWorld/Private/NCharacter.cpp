@@ -2,14 +2,12 @@
 
 
 #include "NCharacter.h"
-#include "InputMappingContext.h"
 #include "InputAction.h"
-#include "NInputSubsystem.h"
-#include "NStateMachineComponent.h"
+#include "SubSystem/NInputSubsystem.h"
+#include "StateMachine/NStateMachineComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "Kismet/KismetMathLibrary.h"
 
 
 // Sets default values
@@ -48,31 +46,6 @@ ANCharacter::ANCharacter()
 	// Movement Setting
 	bUseControllerRotationYaw = false;
 	GetCharacterMovement()->bOrientRotationToMovement = true;
-
-	// 입력 설정
-	static ConstructorHelpers::FObjectFinder<UInputMappingContext> imcDefault(TEXT("/Game/ThirdPerson/Input/IMC_Default.IMC_Default"));
-	if(imcDefault.Succeeded())
-	{
-		IMC_Default = imcDefault.Object.Get();
-	}
-	
-	static ConstructorHelpers::FObjectFinder<UInputAction> iaMove(TEXT("/Game/ThirdPerson/Input/Actions/IA_Move.IA_Move"));
-	if(iaMove.Succeeded())
-	{
-		IA_Move = iaMove.Object.Get();
-	}
-			
-	static ConstructorHelpers::FObjectFinder<UInputAction> iaLook(TEXT("/Game/ThirdPerson/Input/Actions/IA_Look.IA_Look"));
-	if(iaLook.Succeeded())
-	{
-		IA_Look = iaLook.Object.Get();
-	}
-	
-	static ConstructorHelpers::FObjectFinder<UInputAction> iaJump(TEXT("/Game/ThirdPerson/Input/Actions/IA_Jump.IA_Jump"));
-	if(iaJump.Succeeded())
-	{
-		IA_Jump = iaJump.Object.Get();
-	}
 }
 
 // Called when the game starts or when spawned
@@ -103,12 +76,10 @@ void ANCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 void ANCharacter::MoveCharacter(const FVector2D MovementVector)
 {
-	FRotator controlRotation = FRotator(0.f, GetControlRotation().Yaw, 0.f);
-	FVector moveDirX = UKismetMathLibrary::GetForwardVector(controlRotation) * MovementVector.Y;
-	FVector moveDirY = UKismetMathLibrary::GetRightVector(controlRotation) * MovementVector.X;
-	FVector resultMoveDir = moveDirX + moveDirY;
-	DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + (resultMoveDir * 100.0f), FColor::Red, false, 1.0f);
-	AddMovementInput(resultMoveDir, 1.f);
+	// Controller 회전 방향 기준으로 InputVector만큼 이동
+	FVector moveVector = FRotationMatrix(FRotator(0.f, GetControlRotation().Yaw, 0.f)).TransformVector(FVector(MovementVector.Y, MovementVector.X, 0.f));
+	DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + (moveVector * 100.0f), FColor::Red, false, 1.0f);
+	AddMovementInput(moveVector, 1.f);
 }
 
 void ANCharacter::OnInputLook(const FInputActionValue& Value)
@@ -121,9 +92,4 @@ void ANCharacter::OnInputLook(const FInputActionValue& Value)
 void ANCharacter::JumpCharacter()
 {
 	Jump();
-}
-
-void ANCharacter::OnInputJumpEnd(const FInputActionValue& Value)
-{
-	StopJumping();
 }
