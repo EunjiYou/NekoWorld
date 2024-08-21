@@ -9,13 +9,17 @@
 			"Type": "Runtime",
 			"LoadingPhase": "Default",
 			"AdditionalDependencies": [
-				"CoreUObject"
+				"CoreUObject",
+				"Engine"
 			]
 		},
 		{
 			"Name": "NekoWorldEditor",
 			"Type": "Editor",
-			"LoadingPhase": "Default"
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"Blutility"
+			]
 		}
 	],
 	"Plugins": [

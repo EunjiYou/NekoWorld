@@ -2,8 +2,10 @@
 
 
 #include "StateMachine/NStateBase.h"
+
 #include "StateMachine/NStateMachineComponent.h"
 #include "NCharacter.h"
+#include "NCharacterAnimInstance.h"
 #include "SubSystem/NInputSubsystem.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
@@ -17,6 +19,14 @@ void UNStateBase::Init()
 		{
 			Owner = Cast<ANCharacter>(StateMachineComponent->GetOwner());
 		}
+	}
+}
+
+void UNStateBase::OnEnter()
+{
+	if(Owner && Owner->NAnimInstance)
+	{
+		Owner->NAnimInstance->CurCharacterState = MyState;
 	}
 }
 
@@ -111,14 +121,32 @@ void UNStateJump::OnUpdate()
 	if(Owner && Owner->GetCharacterMovement()
 		&& Owner->GetCharacterMovement()->MovementMode != EMovementMode::MOVE_Falling)
 	{
-		Owner->JumpCharacter();
+		if(UNInputSubsystem* inputSubsystem = Owner->GetGameInstance()->GetSubsystem<UNInputSubsystem>())
+		{
+			if(inputSubsystem->JumpKeyPressed)
+			{
+				Owner->JumpCharacter();		
+			}
+		}
+		
 	}
 }
 
 ENState UNStateJump::CheckTransition()
 {
+	if(!Owner)
+	{
+		return ENState::None;
+	}
+	
 	if(UNInputSubsystem* inputSubsystem = Owner->GetGameInstance()->GetSubsystem<UNInputSubsystem>())
 	{
+		if(Owner->GetCharacterMovement()
+			&& Owner->GetCharacterMovement()->MovementMode == EMovementMode::MOVE_Falling)
+		{
+			return ENState::None;
+		}
+		
 		if(inputSubsystem->JumpKeyPressed)
 		{
 			return ENState::None;

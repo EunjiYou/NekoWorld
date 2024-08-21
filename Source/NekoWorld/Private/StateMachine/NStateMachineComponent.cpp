@@ -16,20 +16,22 @@ UNStateMachineComponent::UNStateMachineComponent()
 	// ...
 }
 
+void UNStateMachineComponent::Init()
+{
+	StateClassMap.Add(ENState::OnGround, UNStateOnGround::StaticClass());
+	StateClassMap.Add(ENState::Idle, UNStateIdle::StaticClass());
+	StateClassMap.Add(ENState::Run, UNStateRun::StaticClass());
+	
+	StateClassMap.Add(ENState::OnAir, UNStateOnAir::StaticClass());
+	StateClassMap.Add(ENState::Jump, UNStateJump::StaticClass());
+}
+
 
 // Called when the game starts
 void UNStateMachineComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
-	StateClassMap.Add(ENState::OnGround, UNStateOnGround::StaticClass());
-	StateClassMap.Add(ENState::Idle, UNStateIdle::StaticClass());
-	StateClassMap.Add(ENState::Walk, UNStateWalk::StaticClass());
-	StateClassMap.Add(ENState::Run, UNStateRun::StaticClass());
-	
-	StateClassMap.Add(ENState::OnAir, UNStateOnAir::StaticClass());
-	StateClassMap.Add(ENState::Jump, UNStateJump::StaticClass());
-
+	Init();
 	SetState(ENState::Idle);
 }
 
@@ -109,9 +111,51 @@ UNStateBase* UNStateMachineComponent::GetState(ENState State)
 	UNStateBase* newState = NewObject<UNStateBase>(this, *nextState);
 	newState->MyState = State;
 	newState->Init();
-		
+	
 	StatePool.Add(State, newState);
 
 	return newState;
+}
+
+FNStateDebugData UNStateMachineComponent::GenerateDebugDataRecursive(ENState state)
+{
+	FNStateDebugData debugData;
+	
+	UNStateBase* stateBase = GetState(state);
+	if(stateBase)
+	{
+		debugData.MyState = state;
+		for(ENState child : stateBase->Children)
+		{
+			FNStateDebugData childData = GenerateDebugDataRecursive(child);
+			debugData.Children.Add(childData);
+		}
+	}
+
+	return debugData; 
+}
+
+// *** This method must call after UNStateMachineComponent::Init() ***
+TArray<FNStateDebugData> UNStateMachineComponent::GenerateDebugData()
+{
+	TArray<FNStateDebugData> outData;
+	
+	TArray<ENState> rootChildStates;
+	for(auto stateClassMapPair : StateClassMap)
+	{
+		UNStateBase* stateBase = GetState(stateClassMapPair.Key);
+		if(stateBase && stateBase->Parent == ENState::None)
+		{
+			rootChildStates.Add(stateClassMapPair.Key);
+		}
+	}
+
+	for(ENState rootChildState : rootChildStates)
+	{
+		FNStateDebugData rootChildStateData = GenerateDebugDataRecursive(rootChildState);
+		outData.Add(rootChildStateData);	
+	}
+
+	return outData;
 }
 

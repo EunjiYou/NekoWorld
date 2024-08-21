@@ -6,6 +6,11 @@ public class NekoWorldEditor : ModuleRules
 {
 	public NekoWorldEditor(ReadOnlyTargetRules Target) : base(Target)
 	{
+		// EditorUtilityWidget(StateMachineViewer) 코드에 필요한 모듈
+		PrivateDependencyModuleNames.AddRange(new string[]
+		{
+			"UMGEditor"
+		});
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
 		PublicDependencyModuleNames.AddRange(new string[]
@@ -25,7 +30,10 @@ public class NekoWorldEditor : ModuleRules
 			//
 
 			// My Runtime Module
-			"NekoWorld"
+			"NekoWorld",
+			// For Editor Utility Widget
+			"EditorScriptingUtilities",
+			"UMG"
         });
 	}
 }

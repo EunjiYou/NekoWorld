@@ -12,6 +12,9 @@ public:
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
 
-private:
-	TSharedPtr<class FUICommandList> CommandList;
+	void OnTabManagerChanged();
+
+public:
+	FDelegateHandle DeferredStartDelegateHandle;
+	FName StateMachineViewerTabId;
 };
