@@ -1,9 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "SNekoWorldViewport.h"
+#include "Test/SNekoWorldViewport.h"
 
-#include "NekoWorldViewportClient.h"
+#include "Test/NekoWorldViewportClient.h"
 #include "AdvancedPreviewScene.h"
 
 SNekoWorldViewport::SNekoWorldViewport()

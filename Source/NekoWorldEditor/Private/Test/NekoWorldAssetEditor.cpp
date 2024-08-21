@@ -1,11 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "NekoWorldAssetEditor.h"
+#include "Test/NekoWorldAssetEditor.h"
 
 #include "NekoWorldAsset.h"
-#include "NekoWorldSlateStyle.h"
-#include "SNekoWorldViewport.h"
+#include "Test/NekoWorldSlateStyle.h"
+#include "Test/SNekoWorldViewport.h"
 
 
 const FName FNekoWorldAssetEditor::NekoWorldEditorAppIdentifier = FName(TEXT("NekoWorldEditorApp"));

@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "NekoWorldSlateStyle.h"
+#include "Test/NekoWorldSlateStyle.h"
 
 #include "Styling/SlateStyleRegistry.h"
 #include "Framework/Application/SlateApplication.h"

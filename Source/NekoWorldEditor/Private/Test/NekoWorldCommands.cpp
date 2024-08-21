@@ -1,10 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "NekoWorldCommands.h"
+#include "Test/NekoWorldCommands.h"
 
 #include "Misc/MessageDialog.h"
-#include "NekoWorldAssetEditor.h"
+#include "Test/NekoWorldAssetEditor.h"
 #include "NekoWorldAsset.h"
 
 #define LOCTEXT_NAMESPACE "NekoCommand"
