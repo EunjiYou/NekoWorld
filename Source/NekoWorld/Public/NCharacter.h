@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "NCharacter.generated.h"
 
+class UNCharacterAnimInstance;
 class UInputMappingContext;
 class UInputAction;
 class UCameraComponent;
@@ -27,13 +28,20 @@ public:
 
 	void MoveCharacter(const FVector2D MovementVector);
 	void JumpCharacter();
+
+	virtual void Tick(float DeltaSeconds) override;
 	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 private:
+	void OnInputMove(const FInputActionValue& Value);
 	void OnInputLook(const FInputActionValue& Value);
+
+public:
+	UPROPERTY()
+	UNCharacterAnimInstance* NAnimInstance;
 	
 private:
 	UPROPERTY(VisibleAnywhere)
@@ -44,4 +52,6 @@ private:
 
 	UPROPERTY(VisibleAnyWhere)
 	UNStateMachineComponent* StateMachineComponent;
+
+	FRotator NewRotation;
 };

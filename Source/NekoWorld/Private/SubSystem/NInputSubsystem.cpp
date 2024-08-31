@@ -58,6 +58,7 @@ void UNInputSubsystem::BindInputAction(UInputComponent* PlayerInputComponent)
 void UNInputSubsystem::OnInputMove(const FInputActionValue& Value)
 {
 	MovementVector = Value.Get<FVector2D>();
+	EventInputMove.Broadcast(Value);
 }
 
 void UNInputSubsystem::OnInputLook(const FInputActionValue& Value)

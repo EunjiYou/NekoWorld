@@ -8,8 +8,8 @@
 class ANCharacter;
 class UNStateMachineComponent;
 
-UENUM()
-enum class ENState
+UENUM(BlueprintType)
+enum class ENState : uint8
 {
 	None,
 	OnGround,
@@ -17,7 +17,8 @@ enum class ENState
 	Idle,
 	Walk,
 	Run,
-	Jump
+	Jump,
+	Falling,
 };
 
 UCLASS()
@@ -28,7 +29,7 @@ class UNStateBase : public UObject
 public:
 	virtual void Init();
 	
-	virtual void OnEnter() {}
+	virtual void OnEnter();
 	virtual void OnUpdate() {}
 	virtual void OnLeave() {}
 
@@ -38,7 +39,10 @@ public:
 	
 public:
 	ENState Parent;
+
+	// Debug용으로 사용하는 데이터
 	TArray<ENState> Children;
+	
 	ENState MyState;
 	
 protected:
@@ -78,7 +82,6 @@ class UNStateRun : public UNStateBase
 
 public:
 	virtual void Init() override;
-	virtual void OnUpdate() override;
 	virtual ENState CheckTransition() override;
 };
 
@@ -88,7 +91,7 @@ class UNStateOnAir : public UNStateBase
 	GENERATED_BODY()
 
 public:
-	virtual void Init() override;
+	virtual ENState CheckTransition() override;
 };
 
 UCLASS()
@@ -98,6 +101,22 @@ class UNStateJump : public UNStateBase
 
 public:
 	virtual void Init() override;
-	virtual void OnUpdate() override;
+	virtual void OnEnter() override;
+	virtual void OnLeave() override;
 	virtual ENState CheckTransition() override;
+
+	UFUNCTION()
+	void OnReachedJumpApex();
+
+public:
+	bool CharacterReachedJumpApex;
+};
+
+UCLASS()
+class UNStateFalling : public UNStateBase
+{
+	GENERATED_BODY()
+	
+public:
+	virtual void Init() override;
 };

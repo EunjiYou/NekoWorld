@@ -24,6 +24,7 @@ void UNStateMachineComponent::Init()
 	
 	StateClassMap.Add(ENState::OnAir, UNStateOnAir::StaticClass());
 	StateClassMap.Add(ENState::Jump, UNStateJump::StaticClass());
+	StateClassMap.Add(ENState::Falling, UNStateFalling::StaticClass());
 }
 
 
@@ -90,7 +91,7 @@ void UNStateMachineComponent::SetState(ENState NewState)
 	CurState = GetState(NewState);
 	if(CurState)
 	{
-		CurState->Init();
+		//CurState->Init();
 		CurState->OnEnter();		
 	}
 }

@@ -3,6 +3,7 @@
 
 #include "NCharacter.h"
 #include "InputAction.h"
+#include "NCharacterAnimInstance.h"
 #include "SubSystem/NInputSubsystem.h"
 #include "StateMachine/NStateMachineComponent.h"
 #include "Camera/CameraComponent.h"
@@ -21,7 +22,7 @@ ANCharacter::ANCharacter()
 	if(characterMesh.Succeeded() && GetMesh())
 	{
 		GetMesh()->SetSkeletalMeshAsset(characterMesh.Object.Get());
-		static ConstructorHelpers::FClassFinder<UAnimInstance> animInst(TEXT("/Game/Characters/Mannequins/Animations/ABP_Quinn.ABP_Quinn_C"));
+		static ConstructorHelpers::FClassFinder<UAnimInstance> animInst(TEXT("/Game/Blueprint/NCharacterAnimBP.NCharacterAnimBP_C"));
 		if(animInst.Succeeded())
 		{
 			GetMesh()->SetAnimInstanceClass(animInst.Class);
@@ -45,7 +46,8 @@ ANCharacter::ANCharacter()
 
 	// Movement Setting
 	bUseControllerRotationYaw = false;
-	GetCharacterMovement()->bOrientRotationToMovement = true;
+	// 자연스러운 회전을 위해 이 옵션 대신 회전 보간 적용
+	// GetCharacterMovement()->bOrientRotationToMovement = true;
 }
 
 // Called when the game starts or when spawned
@@ -58,9 +60,12 @@ void ANCharacter::BeginPlay()
 		if(APlayerController* pc = Cast<APlayerController>(Controller))
 		{
 			inputSubsystem->RegisterInputMappingContext(pc->GetLocalPlayer());
+			inputSubsystem->EventInputMove.AddUObject(this, &ANCharacter::OnInputMove);
 			inputSubsystem->EventInputLook.AddUObject(this, &ANCharacter::OnInputLook);
 		}
 	}
+
+	NAnimInstance = Cast<UNCharacterAnimInstance>(GetMesh()->GetAnimInstance());
 }
 
 // Called to bind functionality to input
@@ -79,7 +84,20 @@ void ANCharacter::MoveCharacter(const FVector2D MovementVector)
 	// Controller 회전 방향 기준으로 InputVector만큼 이동
 	FVector moveVector = FRotationMatrix(FRotator(0.f, GetControlRotation().Yaw, 0.f)).TransformVector(FVector(MovementVector.Y, MovementVector.X, 0.f));
 	DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + (moveVector * 100.0f), FColor::Red, false, 1.0f);
+	NewRotation = FRotationMatrix::MakeFromX(moveVector).Rotator();
+	
 	AddMovementInput(moveVector, 1.f);
+}
+
+void ANCharacter::OnInputMove(const FInputActionValue& Value)
+{
+	FVector2D movementVector = Value.Get<FVector2D>();
+	if(movementVector.IsNearlyZero())
+	{
+		return;
+	}
+
+	MoveCharacter(movementVector);
 }
 
 void ANCharacter::OnInputLook(const FInputActionValue& Value)
@@ -92,4 +110,16 @@ void ANCharacter::OnInputLook(const FInputActionValue& Value)
 void ANCharacter::JumpCharacter()
 {
 	Jump();
+}
+
+void ANCharacter::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	if(FMath::Abs(GetActorRotation().Yaw - NewRotation.Yaw) > 1.f)
+	{
+		FRotator InterpRotation = FMath::RInterpTo(GetActorRotation(), NewRotation, DeltaSeconds, 20.0f);
+		// 새로운 회전 적용
+		SetActorRotation(InterpRotation);		
+	}
 }

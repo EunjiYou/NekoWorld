@@ -8,7 +8,7 @@
 
 struct FInputActionValue;
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnInputLook, const FInputActionValue&);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnInputDel, const FInputActionValue&);
 
 UCLASS()
 class NEKOWORLD_API UNInputSubsystem : public UGameInstanceSubsystem
@@ -25,7 +25,8 @@ private:
 	void OnInputJump(const FInputActionValue& Value);
 
 public:
-	FOnInputLook EventInputLook;
+	FOnInputDel EventInputMove;
+	FOnInputDel EventInputLook;
 	
 	FVector2D MovementVector;
 	bool JumpKeyPressed;

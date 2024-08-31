@@ -82,15 +82,6 @@ void UNStateRun::Init()
 	SetParent(ENState::OnGround);
 }
 
-void UNStateRun::OnUpdate()
-{
-	UNInputSubsystem* inputSubsystem = Owner->GetGameInstance()->GetSubsystem<UNInputSubsystem>();
-	if(inputSubsystem)
-	{
-		Owner->MoveCharacter(inputSubsystem->MovementVector);
-	}
-}
-
 ENState UNStateRun::CheckTransition()
 {
 	if(UNInputSubsystem* inputSubsystem = Owner->GetGameInstance()->GetSubsystem<UNInputSubsystem>())
@@ -104,9 +95,20 @@ ENState UNStateRun::CheckTransition()
 	return ENState::None;
 }
 
-void UNStateOnAir::Init()
+ENState UNStateOnAir::CheckTransition()
 {
-	Super::Init();
+	if(!Owner)
+	{
+		return ENState::None;
+	}
+
+	if(Owner->GetCharacterMovement()
+	&& Owner->GetCharacterMovement()->MovementMode != EMovementMode::MOVE_Falling)
+	{
+		return ENState::Idle;
+	}
+
+	return ENState::None;
 }
 
 void UNStateJump::Init()
@@ -116,20 +118,23 @@ void UNStateJump::Init()
 	SetParent(ENState::OnAir);
 }
 
-void UNStateJump::OnUpdate()
+void UNStateJump::OnEnter()
 {
-	if(Owner && Owner->GetCharacterMovement()
-		&& Owner->GetCharacterMovement()->MovementMode != EMovementMode::MOVE_Falling)
-	{
-		if(UNInputSubsystem* inputSubsystem = Owner->GetGameInstance()->GetSubsystem<UNInputSubsystem>())
-		{
-			if(inputSubsystem->JumpKeyPressed)
-			{
-				Owner->JumpCharacter();		
-			}
-		}
-		
-	}
+	Super::OnEnter();
+
+	CharacterReachedJumpApex = false;
+	Owner->GetCharacterMovement()->bNotifyApex = true;
+	Owner->OnReachedJumpApex.AddDynamic(this, &UNStateJump::OnReachedJumpApex);
+	
+	Owner->JumpCharacter();
+}
+
+void UNStateJump::OnLeave()
+{
+	Super::OnLeave();
+	
+	Owner->GetCharacterMovement()->bNotifyApex = false;
+	Owner->OnReachedJumpApex.Remove(this, TEXT("OnReachedJumpApex"));
 }
 
 ENState UNStateJump::CheckTransition()
@@ -138,15 +143,21 @@ ENState UNStateJump::CheckTransition()
 	{
 		return ENState::None;
 	}
+
+	if(CharacterReachedJumpApex)
+	{
+		return ENState::Falling;
+	}
+	
+	if(Owner->GetCharacterMovement()
+	&& Owner->GetCharacterMovement()->MovementMode == EMovementMode::MOVE_Falling)
+	{
+		return ENState::None;
+	}
+	
 	
 	if(UNInputSubsystem* inputSubsystem = Owner->GetGameInstance()->GetSubsystem<UNInputSubsystem>())
-	{
-		if(Owner->GetCharacterMovement()
-			&& Owner->GetCharacterMovement()->MovementMode == EMovementMode::MOVE_Falling)
-		{
-			return ENState::None;
-		}
-		
+	{	
 		if(inputSubsystem->JumpKeyPressed)
 		{
 			return ENState::None;
@@ -163,4 +174,16 @@ ENState UNStateJump::CheckTransition()
 	}
 
 	return ENState::None;
+}
+
+void UNStateJump::OnReachedJumpApex()
+{
+	CharacterReachedJumpApex = true;
+}
+
+void UNStateFalling::Init()
+{
+	Super::Init();
+
+	SetParent(ENState::OnAir);
 }
