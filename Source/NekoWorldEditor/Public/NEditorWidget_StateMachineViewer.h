@@ -7,7 +7,7 @@
 #include "StateMachine/NStateMachineComponent.h"
 #include "NEditorWidget_StateMachineViewer.generated.h"
 
-class UVerticalBox;
+class UEditorUtilityScrollBox;
 class UTextBlock;
 
 
@@ -28,17 +28,22 @@ class UNEditorWidget_StateMachineViewer : public UEditorUtilityWidget
 
 public:
 	virtual void NativeConstruct() override;
+	void TryMakeStateWidget();
 	void GenerateWidgetRecursive(FNStateDebugData data, float marginX);
+
+	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
 	virtual void NativeDestruct() override;
 	
 public:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UNStateDebugWidget> StatebaseWidget;
-
-	UPROPERTY(meta=(BindWidget))
-	UVerticalBox* VerticalBox;
 	
-	AActor* StateMachineOwner;
+	UPROPERTY(meta=(BindWidget))
+	UEditorUtilityScrollBox* StateScrollBox;
+	
 	TArray<FNStateDebugData> StateDataTree;
+
+	ENState CurState;
+	TMap<ENState, UNStateDebugWidget*> StateWidgetMap;
 };
