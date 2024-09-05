@@ -91,8 +91,8 @@ void UNEditorWidget_StateMachineViewer::NativeTick(const FGeometry& MyGeometry, 
 		auto stateMachineComp = myCharacter->GetComponentByClass<UNStateMachineComponent>();
 		if(stateMachineComp)
 		{
-			ENState curState = stateMachineComp->CurState? stateMachineComp->CurState->MyState : ENState::None;
-			ENState prevState = stateMachineComp->PrevState? stateMachineComp->PrevState->MyState : ENState::None;
+			ENState curState = stateMachineComp->CurStateObj? stateMachineComp->CurStateObj->MyState : ENState::None;
+			ENState prevState = stateMachineComp->PrevStateObj? stateMachineComp->PrevStateObj->MyState : ENState::None;
 			if(CurState == curState)
 			{
 				return;

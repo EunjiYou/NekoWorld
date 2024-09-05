@@ -7,6 +7,7 @@
 #include "NCharacterAnimInstance.generated.h"
 
 enum class ENState : uint8;
+class ANCharacter;
 /**
  * 
  */
@@ -21,4 +22,9 @@ public:
 	
 	UPROPERTY(BlueprintReadOnly)
 	ENState CurCharacterState;
+
+	UPROPERTY(BlueprintReadOnly)
+	ANCharacter* OwnerCharacter;
+
+	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 };

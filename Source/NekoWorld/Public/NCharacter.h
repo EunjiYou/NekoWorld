@@ -52,6 +52,4 @@ private:
 
 	UPROPERTY(VisibleAnyWhere)
 	UNStateMachineComponent* StateMachineComponent;
-
-	FRotator NewRotation;
 };

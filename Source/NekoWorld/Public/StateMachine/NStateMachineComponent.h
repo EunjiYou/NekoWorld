@@ -13,11 +13,20 @@ class UNStateBase;
 USTRUCT(BlueprintType)
 struct FNStateDebugData
 {
-	GENERATED_BODY();
+	GENERATED_BODY()
 
 	ENState MyState;
 	// ENState Parent;
 	TArray<FNStateDebugData> Children;
+};
+
+USTRUCT()
+struct FNStateTransitionData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(VisibleAnywhere)
+	int DashCount;
 };
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -53,12 +62,20 @@ public:
 	UPROPERTY(Transient)
 	TMap<ENState, UNStateBase*> StatePool;
 
+
 	UPROPERTY(VisibleAnywhere)
-	UNStateBase* CurState;
-	
+	ENState CurState;
+	UPROPERTY()
+	UNStateBase* CurStateObj;
+
 	UPROPERTY(VisibleAnywhere)
-	UNStateBase* PrevState;
+	ENState PrevState;
+	UPROPERTY()
+	UNStateBase* PrevStateObj;
 	
 	UPROPERTY(VisibleAnywhere)
 	UNStateBase* ReservedState;
+
+	UPROPERTY(VisibleAnywhere)
+	FNStateTransitionData TransitionData;
 };

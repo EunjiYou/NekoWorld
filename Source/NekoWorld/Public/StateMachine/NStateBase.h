@@ -13,10 +13,13 @@ enum class ENState : uint8
 {
 	None,
 	OnGround,
-	OnAir,
 	Idle,
+	WalkRun,
 	Walk,
 	Run,
+	Dash,
+	Sprint,
+	OnAir,
 	Jump,
 	Falling,
 };
@@ -29,8 +32,8 @@ class UNStateBase : public UObject
 public:
 	virtual void Init();
 	
-	virtual void OnEnter();
-	virtual void OnUpdate() {}
+	virtual void OnEnter() {}
+	virtual void OnUpdate(float DeltaTime) {}
 	virtual void OnLeave() {}
 
 	virtual ENState CheckTransition() { return ENState::None; }
@@ -39,84 +42,14 @@ public:
 	
 public:
 	ENState Parent;
-
+	ENState MyState;
+	
 	// Debug용으로 사용하는 데이터
 	TArray<ENState> Children;
 	
-	ENState MyState;
+	
 	
 protected:
 	ANCharacter* Owner;
 	UNStateMachineComponent* StateMachineComponent;
-};
-
-UCLASS()
-class UNStateOnGround : public UNStateBase
-{
-	GENERATED_BODY()
-
-public:
-	virtual ENState CheckTransition() override;
-};
-
-UCLASS()
-class UNStateIdle : public UNStateBase
-{
-	GENERATED_BODY()
-
-public:
-	virtual void Init() override;
-	virtual ENState CheckTransition() override;
-};
-
-UCLASS()
-class UNStateWalk : public UNStateBase
-{
-	GENERATED_BODY()
-};
-
-UCLASS()
-class UNStateRun : public UNStateBase
-{
-	GENERATED_BODY()
-
-public:
-	virtual void Init() override;
-	virtual ENState CheckTransition() override;
-};
-
-UCLASS()
-class UNStateOnAir : public UNStateBase
-{
-	GENERATED_BODY()
-
-public:
-	virtual ENState CheckTransition() override;
-};
-
-UCLASS()
-class UNStateJump : public UNStateBase
-{
-	GENERATED_BODY()
-
-public:
-	virtual void Init() override;
-	virtual void OnEnter() override;
-	virtual void OnLeave() override;
-	virtual ENState CheckTransition() override;
-
-	UFUNCTION()
-	void OnReachedJumpApex();
-
-public:
-	bool CharacterReachedJumpApex;
-};
-
-UCLASS()
-class UNStateFalling : public UNStateBase
-{
-	GENERATED_BODY()
-	
-public:
-	virtual void Init() override;
 };

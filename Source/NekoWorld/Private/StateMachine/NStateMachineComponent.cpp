@@ -4,6 +4,8 @@
 #include "StateMachine/NStateMachineComponent.h"
 
 #include "StateMachine/NStateBase.h"
+#include "StateMachine/NStateOnAir.h"
+#include "StateMachine/NStateOnGround.h"
 
 
 // Sets default values for this component's properties
@@ -20,7 +22,11 @@ void UNStateMachineComponent::Init()
 {
 	StateClassMap.Add(ENState::OnGround, UNStateOnGround::StaticClass());
 	StateClassMap.Add(ENState::Idle, UNStateIdle::StaticClass());
+	StateClassMap.Add(ENState::WalkRun, UNStateWalkRun::StaticClass());
+	StateClassMap.Add(ENState::Walk, UNStateWalk::StaticClass());
 	StateClassMap.Add(ENState::Run, UNStateRun::StaticClass());
+	StateClassMap.Add(ENState::Dash, UNStateDash::StaticClass());
+	StateClassMap.Add(ENState::Sprint, UNStateSprint::StaticClass());
 	
 	StateClassMap.Add(ENState::OnAir, UNStateOnAir::StaticClass());
 	StateClassMap.Add(ENState::Jump, UNStateJump::StaticClass());
@@ -42,12 +48,12 @@ void UNStateMachineComponent::TickComponent(float DeltaTime, ELevelTick TickType
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if(CurState)
+	if(CurStateObj)
 	{
-		CurState->OnUpdate();
+		CurStateObj->OnUpdate(DeltaTime);
 
 		// HFSM 형태로 구현. Parent로부터 Transition을 체크한다.
-		ENState searchState = CurState->MyState;
+		ENState searchState = CurStateObj->MyState;
 		ENState resultState = ENState::None;
 		while(searchState != ENState::None)
 		{
@@ -82,17 +88,19 @@ void UNStateMachineComponent::SetState(ENState NewState)
 		return;
 	}
 	
-	if(CurState)
+	if(CurStateObj)
 	{
 		PrevState = CurState;
-		PrevState->OnLeave();
+		PrevStateObj = CurStateObj;
+		PrevStateObj->OnLeave();
 	}
 
-	CurState = GetState(NewState);
-	if(CurState)
+	CurState = NewState;
+	CurStateObj = GetState(NewState);
+	if(CurStateObj)
 	{
 		//CurState->Init();
-		CurState->OnEnter();		
+		CurStateObj->OnEnter();		
 	}
 }
 

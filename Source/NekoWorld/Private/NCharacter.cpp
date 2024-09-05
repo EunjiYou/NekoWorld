@@ -47,7 +47,7 @@ ANCharacter::ANCharacter()
 	// Movement Setting
 	bUseControllerRotationYaw = false;
 	// 자연스러운 회전을 위해 이 옵션 대신 회전 보간 적용
-	// GetCharacterMovement()->bOrientRotationToMovement = true;
+	GetCharacterMovement()->bOrientRotationToMovement = true;
 }
 
 // Called when the game starts or when spawned
@@ -84,7 +84,6 @@ void ANCharacter::MoveCharacter(const FVector2D MovementVector)
 	// Controller 회전 방향 기준으로 InputVector만큼 이동
 	FVector moveVector = FRotationMatrix(FRotator(0.f, GetControlRotation().Yaw, 0.f)).TransformVector(FVector(MovementVector.Y, MovementVector.X, 0.f));
 	DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + (moveVector * 100.0f), FColor::Red, false, 1.0f);
-	NewRotation = FRotationMatrix::MakeFromX(moveVector).Rotator();
 	
 	AddMovementInput(moveVector, 1.f);
 }
@@ -115,11 +114,4 @@ void ANCharacter::JumpCharacter()
 void ANCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
-
-	if(FMath::Abs(GetActorRotation().Yaw - NewRotation.Yaw) > 1.f)
-	{
-		FRotator InterpRotation = FMath::RInterpTo(GetActorRotation(), NewRotation, DeltaSeconds, 20.0f);
-		// 새로운 회전 적용
-		SetActorRotation(InterpRotation);		
-	}
 }

@@ -23,6 +23,8 @@ private:
 	void OnInputMove(const FInputActionValue& Value);
 	void OnInputLook(const FInputActionValue& Value);
 	void OnInputJump(const FInputActionValue& Value);
+	void OnInputWalkRunToggle(const FInputActionValue& Value);
+	void OnInputDash(const FInputActionValue& Value);
 
 public:
 	FOnInputDel EventInputMove;
@@ -30,4 +32,7 @@ public:
 	
 	FVector2D MovementVector;
 	bool JumpKeyPressed;
+	bool DashKeyPressed;
+	
+	bool IsRun = true;
 };
