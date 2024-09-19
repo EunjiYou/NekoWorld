@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "NCharacter.generated.h"
 
+class UNCharacterMovementComponent;
 class UNCharacterAnimInstance;
 class UInputMappingContext;
 class UInputAction;
@@ -21,12 +22,11 @@ class ANCharacter : public ACharacter
 
 public:
 	// Sets default values for this character's properties
-	ANCharacter();
+	ANCharacter(const FObjectInitializer& ObjectInitializer);
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	void MoveCharacter(const FVector2D MovementVector);
 	void JumpCharacter();
 
 	virtual void Tick(float DeltaSeconds) override;
@@ -52,4 +52,10 @@ private:
 
 	UPROPERTY(VisibleAnyWhere)
 	UNStateMachineComponent* StateMachineComponent;
+
+	UPROPERTY()
+	UNCharacterMovementComponent* NCharacterMovementComponent;
+	
+	UPROPERTY()
+	FVector MoveVector;
 };

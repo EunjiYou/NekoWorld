@@ -7,12 +7,14 @@
 #include "SubSystem/NInputSubsystem.h"
 #include "StateMachine/NStateMachineComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Framework/NCharacterMovementComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 
 
-// Sets default values
-ANCharacter::ANCharacter()
+ANCharacter::ANCharacter(const FObjectInitializer& ObjectInitializer)
+// CharacterMovement를 NCharacterMovementComponent로 교체
+	: Super(ObjectInitializer.SetDefaultSubobjectClass<UNCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -48,6 +50,8 @@ ANCharacter::ANCharacter()
 	bUseControllerRotationYaw = false;
 	// 자연스러운 회전을 위해 이 옵션 대신 회전 보간 적용
 	GetCharacterMovement()->bOrientRotationToMovement = true;
+	GetCharacterMovement()->RotationRate = FRotator(0.f, 1500.f, 0.f);
+	NCharacterMovementComponent = Cast<UNCharacterMovementComponent>(GetCharacterMovement());
 }
 
 // Called when the game starts or when spawned
@@ -79,24 +83,25 @@ void ANCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	}
 }
 
-void ANCharacter::MoveCharacter(const FVector2D MovementVector)
-{
-	// Controller 회전 방향 기준으로 InputVector만큼 이동
-	FVector moveVector = FRotationMatrix(FRotator(0.f, GetControlRotation().Yaw, 0.f)).TransformVector(FVector(MovementVector.Y, MovementVector.X, 0.f));
-	DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + (moveVector * 100.0f), FColor::Red, false, 1.0f);
-	
-	AddMovementInput(moveVector, 1.f);
-}
-
 void ANCharacter::OnInputMove(const FInputActionValue& Value)
 {
-	FVector2D movementVector = Value.Get<FVector2D>();
-	if(movementVector.IsNearlyZero())
+	FVector2D inputVector = Value.Get<FVector2D>();
+	if(inputVector.IsNearlyZero())
 	{
+		MoveVector = FVector(inputVector.Y, inputVector.X, 0.f);
 		return;
 	}
 
-	MoveCharacter(movementVector);
+	// Controller 회전 방향 기준으로 InputVector만큼 이동
+	FVector moveVector = FRotationMatrix(FRotator(0.f, GetControlRotation().Yaw, 0.f)).TransformVector(FVector(inputVector.Y, inputVector.X, 0.f));
+	DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + (moveVector * 100.0f), FColor::Red, false, 1.0f);
+
+	MoveVector = moveVector;
+	if(NCharacterMovementComponent)
+	{
+		NCharacterMovementComponent->DesiredMoveDir = MoveVector;
+	}
+	// AddMovementInput(moveVector, 1.f);
 }
 
 void ANCharacter::OnInputLook(const FInputActionValue& Value)
@@ -114,4 +119,9 @@ void ANCharacter::JumpCharacter()
 void ANCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
+
+	if(!MoveVector.IsNearlyZero())
+	{
+		AddMovementInput(MoveVector, 1.f);
+	}
 }
