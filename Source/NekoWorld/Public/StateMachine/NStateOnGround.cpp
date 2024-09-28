@@ -2,6 +2,7 @@
 
 #include "NCharacter.h"
 #include "NStateMachineComponent.h"
+#include "Common/CommonEnum.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "SubSystem/NInputSubsystem.h"
 
@@ -154,19 +155,18 @@ void UNStateDash::OnUpdate(float DeltaTime)
 
 ENState UNStateDash::CheckTransition()
 {
-	if( Duration > 0.5f )
+	if(ReceivedCancelAction == ENActionInputType::Dash)
+	{
+		if(StateMachineComponent && StateMachineComponent->TransitionData.DashCount < 2)
+		{
+			return ENState::Dash;	
+		}
+	}
+	
+	if( Duration > 1.2f )
 	{
 		if(UNInputSubsystem* inputSubsystem = Owner->GetGameInstance()->GetSubsystem<UNInputSubsystem>())
 		{
-			// Todo : 선입력을 통한 Dash Transition Check 필요
-			if(inputSubsystem->DashKeyPressed)
-			{
-				if(StateMachineComponent && StateMachineComponent->TransitionData.DashCount < 2)
-				{
-					return ENState::Dash;	
-				}
-			}
-			
 			if(!inputSubsystem->MovementVector.IsNearlyZero())
 			{
 				return ENState::Sprint;

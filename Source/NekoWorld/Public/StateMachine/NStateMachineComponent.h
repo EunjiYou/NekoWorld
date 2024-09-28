@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "NStateMachineComponent.generated.h"
 
+enum class ENActionInputType : uint8;
 enum class ENState : uint8;
 class UNStateBase;
 
@@ -25,6 +26,10 @@ struct FNStateTransitionData
 {
 	GENERATED_BODY()
 
+	FNStateTransitionData()
+		: DashCount(0)
+	{}
+
 	UPROPERTY(VisibleAnywhere)
 	int DashCount;
 };
@@ -38,23 +43,25 @@ public:
 	// Sets default values for this component's properties
 	UNStateMachineComponent();
 
-	UFUNCTION(BlueprintCallable)
 	void Init();
 
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	void SetState(ENState NewState);
 	UNStateBase* GetState(ENState State);
 
 	FNStateDebugData GenerateDebugDataRecursive(ENState state);
 	UFUNCTION(BlueprintCallable)
 	TArray<FNStateDebugData> GenerateDebugData();
+
+	void OnInputAction(const ENActionInputType actionInputType);
 	
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
+private:
+	void SetState(ENState NewState);
 	
 public:
 	TMap<ENState, TSubclassOf<UNStateBase>> StateClassMap;

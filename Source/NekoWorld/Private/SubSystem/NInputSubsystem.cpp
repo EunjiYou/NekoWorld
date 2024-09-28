@@ -5,6 +5,14 @@
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
 #include "InputMappingContext.h"
+#include "Common/CommonEnum.h"
+
+void UNInputSubsystem::Initialize(FSubsystemCollectionBase& Collection)
+{
+	Super::Initialize(Collection);
+
+	ActionInputButton.Init(false, (uint8)ENActionInputType::Max);
+}
 
 void UNInputSubsystem::RegisterInputMappingContext(const ULocalPlayer* LocalPlayer)
 {
@@ -90,4 +98,12 @@ void UNInputSubsystem::OnInputWalkRunToggle(const FInputActionValue& Value)
 void UNInputSubsystem::OnInputDash(const FInputActionValue& Value)
 {
 	DashKeyPressed = Value.Get<bool>();
+
+	SetActionInputButton(ENActionInputType::Dash, DashKeyPressed);
+}
+
+void UNInputSubsystem::SetActionInputButton(ENActionInputType action, bool isPressed)
+{
+	ActionInputButton[(uint8)action] = isPressed;
+	EventInputAction.Broadcast(action);
 }

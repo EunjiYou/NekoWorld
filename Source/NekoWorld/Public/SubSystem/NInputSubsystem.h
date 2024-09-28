@@ -6,9 +6,11 @@
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "NInputSubsystem.generated.h"
 
+enum class ENActionInputType : uint8;
 struct FInputActionValue;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnInputDel, const FInputActionValue&);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnInputActionDel, const ENActionInputType);
 
 UCLASS()
 class NEKOWORLD_API UNInputSubsystem : public UGameInstanceSubsystem
@@ -16,6 +18,8 @@ class NEKOWORLD_API UNInputSubsystem : public UGameInstanceSubsystem
 	GENERATED_BODY()
 
 public:
+	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+	
 	void RegisterInputMappingContext(const ULocalPlayer* LocalPlayer);
 	void BindInputAction(UInputComponent* PlayerInputComponent);
 
@@ -26,7 +30,13 @@ private:
 	void OnInputWalkRunToggle(const FInputActionValue& Value);
 	void OnInputDash(const FInputActionValue& Value);
 
+	void SetActionInputButton(ENActionInputType action, bool isPressed);
+
 public:
+	TBitArray<> ActionInputButton;
+	// InputActionButton에 대한 변경을 알려줄 Delegate 필요
+	FOnInputActionDel EventInputAction;
+	
 	FOnInputDel EventInputMove;
 	FOnInputDel EventInputLook;
 	

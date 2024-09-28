@@ -3,9 +3,11 @@
 
 #include "StateMachine/NStateMachineComponent.h"
 
+#include "Common/CommonEnum.h"
 #include "StateMachine/NStateBase.h"
 #include "StateMachine/NStateOnAir.h"
 #include "StateMachine/NStateOnGround.h"
+#include "SubSystem/NInputSubsystem.h"
 
 
 // Sets default values for this component's properties
@@ -31,6 +33,16 @@ void UNStateMachineComponent::Init()
 	StateClassMap.Add(ENState::OnAir, UNStateOnAir::StaticClass());
 	StateClassMap.Add(ENState::Jump, UNStateJump::StaticClass());
 	StateClassMap.Add(ENState::Falling, UNStateFalling::StaticClass());
+
+	if(auto world = GetWorld())
+	{
+		auto inputSubSystem = world->GetGameInstance()->GetSubsystem<UNInputSubsystem>();
+		if(inputSubSystem)
+		{
+			inputSubSystem->EventInputAction.AddUObject(this, &UNStateMachineComponent::OnInputAction);
+		}
+	}
+	
 }
 
 
@@ -73,11 +85,16 @@ void UNStateMachineComponent::TickComponent(float DeltaTime, ELevelTick TickType
 				break;
 			}
 		}
-
+		
 		if(resultState != ENState::None)
 		{
 			SetState(resultState);
-		}	
+		}
+		else
+		{
+			// Transition Check를 한 번 진행한 후에는 데이터 리셋
+			CurStateObj->ReceivedCancelAction = ENActionInputType::None;
+		}
 	}
 }
 
@@ -166,5 +183,16 @@ TArray<FNStateDebugData> UNStateMachineComponent::GenerateDebugData()
 	}
 
 	return outData;
+}
+
+void UNStateMachineComponent::OnInputAction(const ENActionInputType actionInputType)
+{
+	if(CurStateObj && CurStateObj->HasCancelActionInput)
+	{
+		if(CurStateObj->CancelActionInputs.Find(actionInputType))
+		{
+			CurStateObj->ReceivedCancelAction = actionInputType;
+		}
+	}
 }
 

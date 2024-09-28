@@ -5,6 +5,7 @@
 
 #include "StateMachine/NStateMachineComponent.h"
 #include "NCharacter.h"
+#include "Common/CommonEnum.h"
 
 
 void UNStateBase::Init()
@@ -17,6 +18,13 @@ void UNStateBase::Init()
 			Owner = Cast<ANCharacter>(StateMachineComponent->GetOwner());
 		}
 	}
+}
+
+void UNStateBase::OnEnter()
+{
+	HasCancelActionInput = false;
+	CancelActionInputs.Empty();
+	ReceivedCancelAction = ENActionInputType::None;
 }
 
 void UNStateBase::SetParent(ENState ParentState)
