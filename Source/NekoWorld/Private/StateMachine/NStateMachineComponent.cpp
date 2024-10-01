@@ -22,6 +22,22 @@ UNStateMachineComponent::UNStateMachineComponent()
 
 void UNStateMachineComponent::Init()
 {
+	RegisterState();
+
+	if(auto world = GetWorld())
+	{
+		auto inputSubSystem = world->GetGameInstance()->GetSubsystem<UNInputSubsystem>();
+		if(inputSubSystem)
+		{
+			inputSubSystem->EventInputAction.AddUObject(this, &UNStateMachineComponent::OnInputAction);
+		}
+	}
+
+	OnStateChange.Clear();
+}
+
+void UNStateMachineComponent::RegisterState()
+{
 	StateClassMap.Add(ENState::OnGround, UNStateOnGround::StaticClass());
 	StateClassMap.Add(ENState::Idle, UNStateIdle::StaticClass());
 	StateClassMap.Add(ENState::WalkRun, UNStateWalkRun::StaticClass());
@@ -33,16 +49,6 @@ void UNStateMachineComponent::Init()
 	StateClassMap.Add(ENState::OnAir, UNStateOnAir::StaticClass());
 	StateClassMap.Add(ENState::Jump, UNStateJump::StaticClass());
 	StateClassMap.Add(ENState::Falling, UNStateFalling::StaticClass());
-
-	if(auto world = GetWorld())
-	{
-		auto inputSubSystem = world->GetGameInstance()->GetSubsystem<UNInputSubsystem>();
-		if(inputSubSystem)
-		{
-			inputSubSystem->EventInputAction.AddUObject(this, &UNStateMachineComponent::OnInputAction);
-		}
-	}
-	
 }
 
 
@@ -119,6 +125,8 @@ void UNStateMachineComponent::SetState(ENState NewState)
 		//CurState->Init();
 		CurStateObj->OnEnter();		
 	}
+
+	OnStateChange.Broadcast(PrevState, CurState);
 }
 
 UNStateBase* UNStateMachineComponent::GetState(ENState State)
@@ -143,6 +151,18 @@ UNStateBase* UNStateMachineComponent::GetState(ENState State)
 	return newState;
 }
 
+void UNStateMachineComponent::OnInputAction(const ENActionInputType actionInputType)
+{
+	if(CurStateObj && CurStateObj->HasCancelActionInput)
+	{
+		if(CurStateObj->CancelActionInputs.Find(actionInputType))
+		{
+			CurStateObj->ReceivedCancelAction = actionInputType;
+		}
+	}
+}
+
+#if WITH_EDITOR
 FNStateDebugData UNStateMachineComponent::GenerateDebugDataRecursive(ENState state)
 {
 	FNStateDebugData debugData;
@@ -184,15 +204,5 @@ TArray<FNStateDebugData> UNStateMachineComponent::GenerateDebugData()
 
 	return outData;
 }
-
-void UNStateMachineComponent::OnInputAction(const ENActionInputType actionInputType)
-{
-	if(CurStateObj && CurStateObj->HasCancelActionInput)
-	{
-		if(CurStateObj->CancelActionInputs.Find(actionInputType))
-		{
-			CurStateObj->ReceivedCancelAction = actionInputType;
-		}
-	}
-}
+#endif
 

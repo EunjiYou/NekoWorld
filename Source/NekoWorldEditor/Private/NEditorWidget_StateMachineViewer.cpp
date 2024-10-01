@@ -17,6 +17,8 @@ void UNEditorWidget_StateMachineViewer::NativeConstruct()
 	Super::NativeConstruct();
 
 	TryMakeStateWidget();
+
+	StateLogClearBtn->OnClicked.AddDynamic(this, &UNEditorWidget_StateMachineViewer::OnClickStateLocClearBtn);
 }
 
 void UNEditorWidget_StateMachineViewer::TryMakeStateWidget()
@@ -40,7 +42,7 @@ void UNEditorWidget_StateMachineViewer::TryMakeStateWidget()
 		{
 			if(UNStateMachineComponent* stateMachineComponent = Cast<UNStateMachineComponent>(stateMachineOwner->AddComponentByClass(UNStateMachineComponent::StaticClass(), true, FTransform::Identity, false)))
 			{
-				stateMachineComponent->Init();
+				stateMachineComponent->RegisterState();
 				StateDataTree = stateMachineComponent->GenerateDebugData();
 			}
 		}
@@ -80,37 +82,32 @@ void UNEditorWidget_StateMachineViewer::GenerateWidgetRecursive(FNStateDebugData
 	}
 }
 
+void UNEditorWidget_StateMachineViewer::OnClickStateLocClearBtn()
+{
+	StateLogScrollBox->ClearChildren();
+}
+
 void UNEditorWidget_StateMachineViewer::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
 	Super::NativeTick(MyGeometry, InDeltaTime);
 	
-	// 현재 Character State 표시
+	// Main Character가 있을 시 그 Character에게 State 변화를 받기 위한 Delefate 등록
 	auto myCharacter = GEditor->GetPIEWorldContext()? UGameplayStatics::GetPlayerCharacter(GEditor->GetPIEWorldContext()->World(), 0) : nullptr;
 	if(myCharacter)
 	{
-		auto stateMachineComp = myCharacter->GetComponentByClass<UNStateMachineComponent>();
-		if(stateMachineComp)
+		if(!IsBoundingStateChanged)
 		{
-			ENState curState = stateMachineComp->CurStateObj? stateMachineComp->CurStateObj->MyState : ENState::None;
-			ENState prevState = stateMachineComp->PrevStateObj? stateMachineComp->PrevStateObj->MyState : ENState::None;
-			if(CurState == curState)
+			auto stateMachineComp = myCharacter->GetComponentByClass<UNStateMachineComponent>();
+			if(stateMachineComp)
 			{
-				return;
-			}
-
-			CurState = curState;
-			if(auto curStateBtn = StateWidgetMap.FindRef(CurState))
-			{
-				curStateBtn->SetColorAndOpacity(FLinearColor::Red);
-			}
-			if(auto prevStateBtn = StateWidgetMap.FindRef(prevState))
-			{
-				prevStateBtn->SetColorAndOpacity(FLinearColor::Gray);
+				stateMachineComp->OnStateChange.AddUObject(this, &UNEditorWidget_StateMachineViewer::OnStateChanged);
+				IsBoundingStateChanged = true;	
 			}
 		}
 	}
 	else
 	{
+		IsBoundingStateChanged = false;
 		for(auto stateBtn : StateScrollBox->GetAllChildren())
 		{
 			if(auto stateDebugBtn = Cast<UNStateDebugWidget>(stateBtn))
@@ -126,4 +123,30 @@ void UNEditorWidget_StateMachineViewer::NativeDestruct()
 	Super::NativeDestruct();
 	
 	StateWidgetMap.Empty();
+}
+
+void UNEditorWidget_StateMachineViewer::OnStateChanged(ENState curState, ENState nextState)
+{
+	// 현재 State를 Color로 강조
+	if(auto curStateBtn = StateWidgetMap.FindRef(nextState))
+	{
+		curStateBtn->SetColorAndOpacity(FLinearColor::Red);
+	}
+	if(auto prevStateBtn = StateWidgetMap.FindRef(curState))
+	{
+		prevStateBtn->SetColorAndOpacity(FLinearColor::Gray);
+	}
+
+	// State Log
+	FString curStateName;
+	UEnum::GetValueAsString(curState).Split(TEXT("::"), nullptr, &curStateName);
+	FString nextStateName;
+	UEnum::GetValueAsString(nextState).Split(TEXT("::"), nullptr, &nextStateName);
+	FString logResult = curStateName + "->" + nextStateName;
+	
+	UTextBlock* logText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass());
+	logText->SetText(FText::FromString(logResult));
+	StateLogScrollBox->AddChild(logText);
+
+	StateLogScrollBox->ScrollToEnd();
 }

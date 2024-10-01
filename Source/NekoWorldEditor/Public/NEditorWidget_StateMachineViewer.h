@@ -7,9 +7,9 @@
 #include "StateMachine/NStateMachineComponent.h"
 #include "NEditorWidget_StateMachineViewer.generated.h"
 
+class UEditorUtilityButton;
 class UEditorUtilityScrollBox;
 class UTextBlock;
-
 
 UCLASS(BlueprintType)
 class UNStateDebugWidget : public UEditorUtilityWidget
@@ -30,20 +30,33 @@ public:
 	virtual void NativeConstruct() override;
 	void TryMakeStateWidget();
 	void GenerateWidgetRecursive(FNStateDebugData data, float marginX);
+	UFUNCTION()
+	void OnClickStateLocClearBtn();
 
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
 	virtual void NativeDestruct() override;
+
+	void OnStateChanged(ENState curState, ENState nextState);
 	
 public:
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<UNStateDebugWidget> StatebaseWidget;
-	
 	UPROPERTY(meta=(BindWidget))
 	UEditorUtilityScrollBox* StateScrollBox;
+
+	UPROPERTY(meta=(BindWidget))
+	UEditorUtilityScrollBox* StateLogScrollBox;
+	
+	UPROPERTY(meta=(BindWidget))
+	UEditorUtilityButton* StateLogClearBtn;
+	
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UNStateDebugWidget> StatebaseWidget;
 	
 	TArray<FNStateDebugData> StateDataTree;
 
 	ENState CurState;
 	TMap<ENState, UNStateDebugWidget*> StateWidgetMap;
+
+	// StateChange Delegate 바운딩 여부 체크
+	bool IsBoundingStateChanged = false;
 };

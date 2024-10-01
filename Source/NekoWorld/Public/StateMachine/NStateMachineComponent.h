@@ -34,6 +34,8 @@ struct FNStateTransitionData
 	int DashCount;
 };
 
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnStateChangeDel, ENState, ENState); // CurState, NextState
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class NEKOWORLD_API UNStateMachineComponent : public UActorComponent
 {
@@ -44,18 +46,20 @@ public:
 	UNStateMachineComponent();
 
 	void Init();
+	void RegisterState();
 
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UNStateBase* GetState(ENState State);
 
-	FNStateDebugData GenerateDebugDataRecursive(ENState state);
-	UFUNCTION(BlueprintCallable)
-	TArray<FNStateDebugData> GenerateDebugData();
-
 	void OnInputAction(const ENActionInputType actionInputType);
 	
+#if WITH_EDITORONLY_DATA
+	FNStateDebugData GenerateDebugDataRecursive(ENState state);
+	TArray<FNStateDebugData> GenerateDebugData();
+#endif
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -85,4 +89,6 @@ public:
 
 	UPROPERTY(VisibleAnywhere)
 	FNStateTransitionData TransitionData;
+
+	FOnStateChangeDel OnStateChange;
 };
