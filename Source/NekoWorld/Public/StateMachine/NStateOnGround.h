@@ -62,6 +62,26 @@ class UNStateDash : public UNStateBase
 
 public:
 	virtual void Init() override;
+};
+
+UCLASS()
+class UNStateDashStart : public UNStateBase
+{
+	GENERATED_BODY()
+
+public:
+	virtual void Init() override;
+	virtual void OnEnter() override;
+	virtual ENState CheckTransition() override;
+};
+
+UCLASS()
+class UNStateDashEnd : public UNStateBase
+{
+	GENERATED_BODY()
+
+public:
+	virtual void Init() override;
 	virtual void OnEnter() override;
 	virtual void OnUpdate(float DeltaTime) override;
 	virtual ENState CheckTransition() override;

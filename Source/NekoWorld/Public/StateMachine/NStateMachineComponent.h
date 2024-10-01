@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "NStateBase.h"
 #include "Components/ActorComponent.h"
 #include "NStateMachineComponent.generated.h"
 
@@ -54,6 +55,9 @@ public:
 	UNStateBase* GetState(ENState State);
 
 	void OnInputAction(const ENActionInputType actionInputType);
+
+	ENState GetCurState() { return CurStateObj? CurStateObj->MyState : ENState::None; }
+	ENState GetPrevState() { return PrevStateObj? PrevStateObj->MyState : ENState::None; }
 	
 #if WITH_EDITORONLY_DATA
 	FNStateDebugData GenerateDebugDataRecursive(ENState state);
@@ -72,15 +76,10 @@ public:
 	
 	UPROPERTY(Transient)
 	TMap<ENState, UNStateBase*> StatePool;
-
-
-	UPROPERTY(VisibleAnywhere)
-	ENState CurState;
+	
 	UPROPERTY()
 	UNStateBase* CurStateObj;
 
-	UPROPERTY(VisibleAnywhere)
-	ENState PrevState;
 	UPROPERTY()
 	UNStateBase* PrevStateObj;
 	

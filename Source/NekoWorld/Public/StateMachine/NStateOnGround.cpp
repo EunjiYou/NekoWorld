@@ -33,7 +33,7 @@ ENState UNStateIdle::CheckTransition()
 	{
 		if(inputSubsystem->DashKeyPressed)
 		{
-			return ENState::Dash;
+			return ENState::DashStart;
 		}
 		
 		if(!inputSubsystem->MovementVector.IsNearlyZero())
@@ -58,7 +58,7 @@ ENState UNStateWalkRun::CheckTransition()
 	{
 		if(inputSubsystem->DashKeyPressed)
 		{
-			return ENState::Dash;
+			return ENState::DashStart;
 		}
 		
 		if(inputSubsystem->MovementVector.IsNearlyZero())
@@ -122,11 +122,17 @@ void UNStateDash::Init()
 	SetParent(ENState::OnGround);
 }
 
-void UNStateDash::OnEnter()
+void UNStateDashStart::Init()
+{
+	Super::Init();
+
+	SetParent(ENState::Dash);
+}
+
+void UNStateDashStart::OnEnter()
 {
 	Super::OnEnter();
-
-	Duration = 0.f;
+	
 	if(auto movementComp = Owner->GetCharacterMovement())
 	{
 		movementComp->MaxWalkSpeed = 1200.0f;
@@ -134,7 +140,7 @@ void UNStateDash::OnEnter()
 
 	if(StateMachineComponent)
 	{
-		if(StateMachineComponent->PrevState == MyState)
+		if(StateMachineComponent->GetPrevState() == ENState::DashEnd)
 		{
 			StateMachineComponent->TransitionData.DashCount++;
 		}
@@ -145,7 +151,27 @@ void UNStateDash::OnEnter()
 	}
 }
 
-void UNStateDash::OnUpdate(float DeltaTime)
+ENState UNStateDashStart::CheckTransition()
+{
+	// Dash를 두 단계로 분리하기 위한 State인 지라 바로 DashEndState로 넘김
+	return ENState::DashEnd;
+}
+
+void UNStateDashEnd::Init()
+{
+	Super::Init();
+
+	SetParent(ENState::Dash);
+}
+
+void UNStateDashEnd::OnEnter()
+{
+	Super::OnEnter();
+
+	Duration = 0.f;
+}
+
+void UNStateDashEnd::OnUpdate(float DeltaTime)
 {
 	Super::OnUpdate(DeltaTime);
 
@@ -153,13 +179,13 @@ void UNStateDash::OnUpdate(float DeltaTime)
 	Owner->AddMovementInput(Owner->GetActorForwardVector(), 1.f);
 }
 
-ENState UNStateDash::CheckTransition()
+ENState UNStateDashEnd::CheckTransition()
 {
 	if(ReceivedCancelAction == ENActionInputType::Dash)
 	{
 		if(StateMachineComponent && StateMachineComponent->TransitionData.DashCount < 2)
 		{
-			return ENState::Dash;	
+			return ENState::DashStart;	
 		}
 	}
 	

@@ -19,6 +19,8 @@ enum class ENState : uint8
 	Walk,
 	Run,
 	Dash,
+	DashStart,
+	DashEnd,
 	Sprint,
 	OnAir,
 	Jump,

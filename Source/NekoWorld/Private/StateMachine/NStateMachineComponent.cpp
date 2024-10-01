@@ -44,6 +44,8 @@ void UNStateMachineComponent::RegisterState()
 	StateClassMap.Add(ENState::Walk, UNStateWalk::StaticClass());
 	StateClassMap.Add(ENState::Run, UNStateRun::StaticClass());
 	StateClassMap.Add(ENState::Dash, UNStateDash::StaticClass());
+	StateClassMap.Add(ENState::DashStart, UNStateDashStart::StaticClass());
+	StateClassMap.Add(ENState::DashEnd, UNStateDashEnd::StaticClass());
 	StateClassMap.Add(ENState::Sprint, UNStateSprint::StaticClass());
 	
 	StateClassMap.Add(ENState::OnAir, UNStateOnAir::StaticClass());
@@ -71,7 +73,7 @@ void UNStateMachineComponent::TickComponent(float DeltaTime, ELevelTick TickType
 		CurStateObj->OnUpdate(DeltaTime);
 
 		// HFSM 형태로 구현. Parent로부터 Transition을 체크한다.
-		ENState searchState = CurStateObj->MyState;
+		ENState searchState = GetCurState();
 		ENState resultState = ENState::None;
 		while(searchState != ENState::None)
 		{
@@ -92,7 +94,7 @@ void UNStateMachineComponent::TickComponent(float DeltaTime, ELevelTick TickType
 			}
 		}
 		
-		if(resultState != ENState::None)
+		if(resultState != ENState::None && resultState != GetCurState())
 		{
 			SetState(resultState);
 		}
@@ -113,12 +115,10 @@ void UNStateMachineComponent::SetState(ENState NewState)
 	
 	if(CurStateObj)
 	{
-		PrevState = CurState;
 		PrevStateObj = CurStateObj;
 		PrevStateObj->OnLeave();
 	}
 
-	CurState = NewState;
 	CurStateObj = GetState(NewState);
 	if(CurStateObj)
 	{
@@ -126,7 +126,7 @@ void UNStateMachineComponent::SetState(ENState NewState)
 		CurStateObj->OnEnter();		
 	}
 
-	OnStateChange.Broadcast(PrevState, CurState);
+	OnStateChange.Broadcast(PrevStateObj? PrevStateObj->MyState : ENState::None, CurStateObj? CurStateObj->MyState : ENState::None);
 }
 
 UNStateBase* UNStateMachineComponent::GetState(ENState State)
@@ -155,7 +155,7 @@ void UNStateMachineComponent::OnInputAction(const ENActionInputType actionInputT
 {
 	if(CurStateObj && CurStateObj->HasCancelActionInput)
 	{
-		if(CurStateObj->CancelActionInputs.Find(actionInputType))
+		if(CurStateObj->CancelActionInputs.Contains(actionInputType))
 		{
 			CurStateObj->ReceivedCancelAction = actionInputType;
 		}
