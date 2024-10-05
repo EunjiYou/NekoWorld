@@ -22,6 +22,7 @@ enum class ENState : uint8
 	DashStart,
 	DashEnd,
 	Sprint,
+	Sliding,
 	OnAir,
 	Jump,
 	Falling,
@@ -60,10 +61,10 @@ public:
 	// CancelActionInputs 중 이 State가 받은 입력 타입. 한 Tick에 입력이 여러개가 들어왔을 경우 맨 마지막 입력으로 세팅한다. 
 	ENActionInputType ReceivedCancelAction;
 
-#if WITH_EDITORONLY_DATA
+// #if WITH_EDITORONLY_DATA
 	// Debug용으로 사용하는 데이터
 	TArray<ENState> Children;
-#endif
+// #endif
 	
 protected:
 	ANCharacter* Owner;

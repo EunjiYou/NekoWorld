@@ -47,6 +47,7 @@ void UNStateMachineComponent::RegisterState()
 	StateClassMap.Add(ENState::DashStart, UNStateDashStart::StaticClass());
 	StateClassMap.Add(ENState::DashEnd, UNStateDashEnd::StaticClass());
 	StateClassMap.Add(ENState::Sprint, UNStateSprint::StaticClass());
+	StateClassMap.Add(ENState::Sliding, UNStateSliding::StaticClass());
 	
 	StateClassMap.Add(ENState::OnAir, UNStateOnAir::StaticClass());
 	StateClassMap.Add(ENState::Jump, UNStateJump::StaticClass());

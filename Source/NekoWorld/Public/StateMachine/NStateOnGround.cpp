@@ -17,6 +17,19 @@ ENState UNStateOnGround::CheckTransition()
 		}
 	}
 	
+	if(Owner && Owner->GetCharacterMovement())
+	{
+		const auto characterMovement = Owner->GetCharacterMovement();
+		// 항시 찾을 수 있는 바닥 정보
+		FFindFloorResult FloorResult;
+		characterMovement->FindFloor(Owner->GetActorLocation(), FloorResult, false);
+					
+		if(FloorResult.bBlockingHit && !characterMovement->IsWalkable(FloorResult.HitResult))
+		{
+			return ENState::Sliding;
+		}
+	}
+	
 	return ENState::None;
 }
 
@@ -234,4 +247,50 @@ ENState UNStateSprint::CheckTransition()
 	}
 	
 	return ENState::None;
+}
+
+void UNStateSliding::Init()
+{
+	Super::Init();
+
+	SetParent(ENState::OnGround);
+}
+
+void UNStateSliding::OnEnter()
+{
+	Super::OnEnter();
+
+	// 슬라이딩 중에는 회전하지 않도록 Block 처리
+	if(Owner && Owner->GetCharacterMovement())
+	{
+		Owner->GetCharacterMovement()->bOrientRotationToMovement = false;
+	}
+}
+
+void UNStateSliding::OnLeave()
+{
+	Super::OnLeave();
+
+	// 슬라이딩 중 Block 시켜둔 회전 기능 리셋
+	if(Owner && Owner->GetCharacterMovement())
+	{
+		Owner->GetCharacterMovement()->bOrientRotationToMovement = true;
+	}
+}
+
+ENState UNStateSliding::CheckTransition()
+{
+	if(Owner && Owner->GetCharacterMovement())
+	{
+		const auto characterMovement = Owner->GetCharacterMovement();
+		FFindFloorResult FloorResult;
+		characterMovement->FindFloor(Owner->GetActorLocation(), FloorResult, false);
+					
+		if(!FloorResult.bBlockingHit || characterMovement->IsWalkable(FloorResult.HitResult))
+		{
+			return ENState::Idle;
+		}
+	}
+	
+	return Super::CheckTransition();
 }
