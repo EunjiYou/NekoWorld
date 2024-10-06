@@ -1,8 +1,9 @@
-﻿#include "NStateOnAir.h"
+﻿#include "StateMachine/NStateOnAir.h"
 
 #include "NCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "SubSystem/NInputSubsystem.h"
+
 
 ENState UNStateOnAir::CheckTransition()
 {

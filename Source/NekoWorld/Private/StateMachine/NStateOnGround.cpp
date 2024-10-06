@@ -1,7 +1,7 @@
-﻿#include "NStateOnGround.h"
+﻿#include "StateMachine/NStateOnGround.h"
 
 #include "NCharacter.h"
-#include "NStateMachineComponent.h"
+#include "StateMachine/NStateMachineComponent.h"
 #include "Common/CommonEnum.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "SubSystem/NInputSubsystem.h"
