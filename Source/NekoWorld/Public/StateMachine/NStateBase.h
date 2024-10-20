@@ -23,6 +23,11 @@ enum class ENState : uint8
 	DashEnd,
 	Sprint,
 	Sliding,
+	OnWall,
+	ClimbingStart,
+	Climbing,
+	ClimbingJump,
+	ClimbingEnd,
 	OnAir,
 	Jump,
 	Falling,
@@ -37,7 +42,7 @@ public:
 	virtual void Init();
 	
 	virtual void OnEnter();
-	virtual void OnUpdate(float DeltaTime) {}
+	virtual void OnUpdate(float DeltaTime) { Duration += DeltaTime; }
 	virtual void OnLeave() {}
 
 	virtual ENState CheckTransition() { return ENState::None; }
@@ -49,10 +54,11 @@ public:
 		HasCancelActionInput = true;
 		CancelActionInputs.AddUnique(actionInputType);
 	}
-	
+
 public:
 	ENState Parent;
 	ENState MyState;
+	float Duration;
 	
 	// 이 State를 Cancel할 수 있는 입력 타입. CancelActionNotify로부터 세팅됨
 	bool HasCancelActionInput;

@@ -72,6 +72,12 @@ void UNInputSubsystem::BindInputAction(UInputComponent* PlayerInputComponent)
 		eiComp->BindAction(ia_Dash, ETriggerEvent::Triggered, this, &UNInputSubsystem::OnInputDash);
 		eiComp->BindAction(ia_Dash, ETriggerEvent::Completed, this, &UNInputSubsystem::OnInputDash);
 	}
+
+	if(UInputAction* ia_ClimbCancel = Cast<UInputAction>(StaticLoadObject(UInputAction::StaticClass(), nullptr, TEXT("/Game/Blueprint/Input/Actions/IA_ClimbCancel.IA_ClimbCancel"))))
+	{
+		eiComp->BindAction(ia_ClimbCancel, ETriggerEvent::Triggered, this, &UNInputSubsystem::OnInputClimbCancel);
+		eiComp->BindAction(ia_ClimbCancel, ETriggerEvent::Completed, this, &UNInputSubsystem::OnInputClimbCancel);
+	}
 }
 
 void UNInputSubsystem::OnInputMove(const FInputActionValue& Value)
@@ -88,6 +94,8 @@ void UNInputSubsystem::OnInputLook(const FInputActionValue& Value)
 void UNInputSubsystem::OnInputJump(const FInputActionValue& Value)
 {
 	JumpKeyPressed = Value.Get<bool>();
+
+	SetActionInputButton(ENActionInputType::Jump, JumpKeyPressed);
 }
 
 void UNInputSubsystem::OnInputWalkRunToggle(const FInputActionValue& Value)
@@ -100,6 +108,13 @@ void UNInputSubsystem::OnInputDash(const FInputActionValue& Value)
 	DashKeyPressed = Value.Get<bool>();
 
 	SetActionInputButton(ENActionInputType::Dash, DashKeyPressed);
+}
+
+void UNInputSubsystem::OnInputClimbCancel(const FInputActionValue& Value)
+{
+	bool isClimbCancel = Value.Get<bool>();
+
+	SetActionInputButton(ENActionInputType::ClimbCancel, isClimbCancel);
 }
 
 void UNInputSubsystem::SetActionInputButton(ENActionInputType action, bool isPressed)

@@ -25,6 +25,7 @@ void UNStateBase::OnEnter()
 	HasCancelActionInput = false;
 	CancelActionInputs.Empty();
 	ReceivedCancelAction = ENActionInputType::None;
+	Duration = 0.f;
 }
 
 void UNStateBase::SetParent(ENState ParentState)

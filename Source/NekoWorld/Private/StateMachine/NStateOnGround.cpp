@@ -9,6 +9,11 @@
 
 ENState UNStateOnGround::CheckTransition()
 {
+	if(StateMachineComponent && StateMachineComponent->TransitionData.HitWall_OnMoveForward)
+	{
+		return ENState::OnWall;
+	}
+	
 	if(UNInputSubsystem* inputSubsystem = Owner->GetGameInstance()->GetSubsystem<UNInputSubsystem>())
 	{
 		if(inputSubsystem->JumpKeyPressed)
@@ -28,6 +33,12 @@ ENState UNStateOnGround::CheckTransition()
 		{
 			return ENState::Sliding;
 		}
+	}
+
+	// OnGround 외 상태에서 전환된 경우 Idle로 넘김
+	if(StateMachineComponent->GetCurState() == MyState)
+	{
+		return ENState::Idle;
 	}
 	
 	return ENState::None;
@@ -177,18 +188,10 @@ void UNStateDashEnd::Init()
 	SetParent(ENState::Dash);
 }
 
-void UNStateDashEnd::OnEnter()
-{
-	Super::OnEnter();
-
-	Duration = 0.f;
-}
-
 void UNStateDashEnd::OnUpdate(float DeltaTime)
 {
 	Super::OnUpdate(DeltaTime);
 
-	Duration += DeltaTime;
 	Owner->AddMovementInput(Owner->GetActorForwardVector(), 1.f);
 }
 

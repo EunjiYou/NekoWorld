@@ -27,7 +27,7 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	void JumpCharacter();
+	void ClimbingJump(bool forceJumpToUp);
 
 	virtual void Tick(float DeltaSeconds) override;
 	
@@ -39,6 +39,8 @@ private:
 	void OnInputMove(const FInputActionValue& Value);
 	void OnInputLook(const FInputActionValue& Value);
 
+	bool IsClimbable(const FHitResult& Hit);
+	
 public:
 	UPROPERTY()
 	UNCharacterAnimInstance* NAnimInstance;

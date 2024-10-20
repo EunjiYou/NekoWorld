@@ -82,7 +82,6 @@ class UNStateDashEnd : public UNStateBase
 
 public:
 	virtual void Init() override;
-	virtual void OnEnter() override;
 	virtual void OnUpdate(float DeltaTime) override;
 	virtual ENState CheckTransition() override;
 

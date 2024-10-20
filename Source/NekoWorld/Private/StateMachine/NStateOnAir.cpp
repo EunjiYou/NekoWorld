@@ -2,6 +2,7 @@
 
 #include "NCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "StateMachine/NStateMachineComponent.h"
 #include "SubSystem/NInputSubsystem.h"
 
 
@@ -11,6 +12,11 @@ ENState UNStateOnAir::CheckTransition()
 	{
 		return ENState::None;
 	}
+	
+	if(StateMachineComponent && StateMachineComponent->TransitionData.HitWall_OnMoveForward)
+    {
+    	return ENState::OnWall;
+    }
 
 	if(Owner->GetCharacterMovement()
 	&& Owner->GetCharacterMovement()->MovementMode != EMovementMode::MOVE_Falling)
@@ -36,7 +42,7 @@ void UNStateJump::OnEnter()
 	Owner->GetCharacterMovement()->bNotifyApex = true;
 	Owner->OnReachedJumpApex.AddDynamic(this, &UNStateJump::OnReachedJumpApex);
 	
-	Owner->JumpCharacter();
+	Owner->Jump();
 }
 
 void UNStateJump::OnLeave()

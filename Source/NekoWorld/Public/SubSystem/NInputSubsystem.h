@@ -29,6 +29,7 @@ private:
 	void OnInputJump(const FInputActionValue& Value);
 	void OnInputWalkRunToggle(const FInputActionValue& Value);
 	void OnInputDash(const FInputActionValue& Value);
+	void OnInputClimbCancel(const FInputActionValue& Value);
 
 	void SetActionInputButton(ENActionInputType action, bool isPressed);
 

@@ -7,6 +7,7 @@
 #include "StateMachine/NStateBase.h"
 #include "StateMachine/NStateOnAir.h"
 #include "StateMachine/NStateOnGround.h"
+#include "StateMachine/NStateOnWall.h"
 #include "SubSystem/NInputSubsystem.h"
 
 
@@ -48,6 +49,12 @@ void UNStateMachineComponent::RegisterState()
 	StateClassMap.Add(ENState::DashEnd, UNStateDashEnd::StaticClass());
 	StateClassMap.Add(ENState::Sprint, UNStateSprint::StaticClass());
 	StateClassMap.Add(ENState::Sliding, UNStateSliding::StaticClass());
+
+	StateClassMap.Add(ENState::OnWall, UNStateOnWall::StaticClass());
+	StateClassMap.Add(ENState::ClimbingStart, UNStateClimbingStart::StaticClass());
+	StateClassMap.Add(ENState::Climbing, UNStateClimbing::StaticClass());
+	StateClassMap.Add(ENState::ClimbingJump, UNStateClimbingJump::StaticClass());
+	StateClassMap.Add(ENState::ClimbingEnd, UNStateClimbingEnd::StaticClass());
 	
 	StateClassMap.Add(ENState::OnAir, UNStateOnAir::StaticClass());
 	StateClassMap.Add(ENState::Jump, UNStateJump::StaticClass());
@@ -113,19 +120,48 @@ void UNStateMachineComponent::SetState(ENState NewState)
 	{
 		return;
 	}
-	
-	if(CurStateObj)
+
+	auto newStateObj = GetState(NewState);
+	if(!newStateObj)
 	{
-		PrevStateObj = CurStateObj;
-		PrevStateObj->OnLeave();
+		return;
 	}
 
-	CurStateObj = GetState(NewState);
+	// 현재 State에 대한 종료 처리
 	if(CurStateObj)
 	{
-		//CurState->Init();
-		CurStateObj->OnEnter();		
+		auto newStateParents = GetAllParentState(NewState);
+		if(!newStateParents.Contains(GetCurState()))
+		{
+			CurStateObj->OnLeave();
+		}
+		
+		// CurStateObj Parent OnLeave 처리
+		// 한 그룹에 있는 여러 State의 OnLeave() 처리가 반복되는 관계로 현재 State의 부모에서 OnLeave()를 처리하는게 깔끔해 보이므로 들어간 작업
+		{
+			auto curStateParents = GetAllParentState(GetCurState());
+			// 부모가 일치하지 않을 경우 빨리 끊기 위해 최상위 부모부터 체크
+			for(int i = curStateParents.Num() - 1; i >= 0; i--)
+			{
+				if(newStateParents.Contains(curStateParents[i]))
+				{
+					break;
+				}
+
+				if(auto parentStateObj = GetState(curStateParents[i]))
+				{
+					parentStateObj->OnLeave();
+				}
+			}
+		}
+
+		PrevStateObj = CurStateObj;
 	}
+
+	// 새로운 State를 CurState로 변경
+	//newStateObj->Init();
+	newStateObj->OnEnter();
+	CurStateObj = newStateObj;
 
 	OnStateChange.Broadcast(PrevStateObj? PrevStateObj->MyState : ENState::None, CurStateObj? CurStateObj->MyState : ENState::None);
 }
@@ -161,6 +197,48 @@ void UNStateMachineComponent::OnInputAction(const ENActionInputType actionInputT
 			CurStateObj->ReceivedCancelAction = actionInputType;
 		}
 	}
+}
+
+bool UNStateMachineComponent::IsChildStateOf(ENState targetState, ENState parentState, bool recursiveCheck)
+{
+	auto targetStateObj = GetState(targetState);
+	if(!IsValid(targetStateObj))
+	{
+		return false;
+	}
+	
+	if(!recursiveCheck)
+	{
+		return targetStateObj->Parent == parentState; 
+	}
+
+	auto targetStateParents = GetAllParentState(targetState);
+	return targetStateParents.Contains(parentState);
+}
+
+TArray<ENState> UNStateMachineComponent::GetAllParentState(ENState targetState)
+{
+	TArray<ENState> states;
+	auto stateObj = GetState(targetState);
+	if(!stateObj)
+	{
+		return states;
+	}
+	
+	ENState searchState = stateObj->Parent;
+	while(searchState != ENState::None)
+	{
+		states.AddUnique(searchState);
+
+		stateObj = GetState(searchState);
+		if(!stateObj)
+		{
+			break;
+		}
+		searchState = stateObj->Parent;
+	}
+	
+	return states;
 }
 
 #if WITH_EDITOR
