@@ -20,7 +20,7 @@ void UNStateOnWall::OnEnter()
 	{
 		Owner->GetCharacterMovement()->SetMovementMode(MOVE_Flying);
 		Owner->GetCharacterMovement()->MaxFlySpeed = 200.f;
-		Owner->GetCharacterMovement()->BrakingDecelerationFlying = 500.0f;
+		Owner->GetCharacterMovement()->BrakingDecelerationFlying = 1500.0f;
 		Owner->GetCharacterMovement()->bOrientRotationToMovement = false;
 
 		// 발 밑 지형을 판단하기 위해 기준을 낮게 잡아둠. 계단 걷기 때에 영향을 줄 값이라 원상태로 복구 필요
@@ -43,6 +43,11 @@ void UNStateOnWall::OnLeave()
 
 ENState UNStateOnWall::CheckTransition()
 {
+	if(!StateMachineComponent)
+	{
+		return ENState::None;
+	}
+	
 	// ClimbEnd Check
 	{
 		float sphereRadius = 15.f;
@@ -51,14 +56,14 @@ ENState UNStateOnWall::CheckTransition()
 		// Trace를 쏘았을 때 벽이 있는 지를 체크한 결과로 StateMachine Transition Data 업데이트
 		TArray<AActor*> actorsToIgnore;
 		FHitResult hitResult;
-		UKismetSystemLibrary::SphereTraceSingle(GetWorld(),
+		UKismetSystemLibrary::SphereTraceSingle(GetWorld(),\
 			traceStart, traceEnd, sphereRadius,
 			// TraceChannel::ClimbCheck
 			ETraceTypeQuery::TraceTypeQuery3, false, actorsToIgnore, EDrawDebugTrace::ForDuration,
 			hitResult, true, FLinearColor::Green, FLinearColor::Red, 1.f );
 		if(!hitResult.bBlockingHit)
 		{
-			return ENState::ClimbingEnd;
+			return ENState::ClimbEnd;
 		}
 	}
 
@@ -67,26 +72,26 @@ ENState UNStateOnWall::CheckTransition()
 		// 공중에서 벽에 붙을 때는 점프를 하지 않으므로 바로 Climbing 상태로 전환
 		if(StateMachineComponent->IsChildStateOf(StateMachineComponent->GetPrevState(), ENState::OnAir))
 		{
-			return ENState::Climbing;			
+			return ENState::ClimbMove;			
 		}
 		// 공중 외에서는 벽에 붙을 시 점프와 함께 등반 시작
 		else
 		{
-			return ENState::ClimbingStart;	
+			return ENState::ClimbStart;	
 		}
 	}
 	
 	return Super::CheckTransition();
 }
 
-void UNStateClimbingStart::Init()
+void UNStateClimbStart::Init()
 {
 	Super::Init();
 
 	SetParent(ENState::OnWall);
 }
 
-void UNStateClimbingStart::OnEnter()
+void UNStateClimbStart::OnEnter()
 {
 	Super::OnEnter();
 
@@ -96,7 +101,7 @@ void UNStateClimbingStart::OnEnter()
 	}
 }
 
-void UNStateClimbingStart::OnLeave()
+void UNStateClimbStart::OnLeave()
 {
 	Super::OnLeave();
 
@@ -104,53 +109,61 @@ void UNStateClimbingStart::OnLeave()
 	Owner->GetCharacterMovement()->SetMovementMode(MOVE_Flying);
 }
 
-ENState UNStateClimbingStart::CheckTransition()
+ENState UNStateClimbStart::CheckTransition()
 {
 	if(Duration > 0.3f)
 	{
-		return ENState::Climbing;
+		return ENState::ClimbMove;
 	}
 	
 	return Super::CheckTransition();
 }
 
-void UNStateClimbing::Init()
+void UNStateClimbMove::Init()
 {
 	Super::Init();
 
 	SetParent(ENState::OnWall);
 }
 
-ENState UNStateClimbing::CheckTransition()
+ENState UNStateClimbMove::CheckTransition()
 {
 	if(!IsValid(Owner))
 	{
 		return ENState::None;
 	}
 
-	// 등반 취소 (등반 점프, 등반 완료에서는 캔슬이 되지 않음)
-	// X 키를 누르거나 방향키 밑 + 점프 누를 시 취소
+
 	if(auto inputSubsystem = Owner->GetGameInstance()->GetSubsystem<UNInputSubsystem>())
 	{
+		// 등반 취소 (등반 점프, 등반 완료에서는 캔슬이 되지 않음)
+		// X 키를 누르거나 방향키 밑 + 점프 누를 시 취소
 		if(inputSubsystem->ActionInputButton[(uint8)ENActionInputType::ClimbCancel])
 		{
 			return ENState::Falling;
 		}
 
+		// 등반 점프 / 낙하 체크 
 		if(inputSubsystem->ActionInputButton[(uint8)ENActionInputType::Jump])
 		{
+			// 방향키 누름 없이 점프 누르면 낙하
 			if(Owner->GetCharacterMovement()->GetPendingInputVector().Z < 0.f)
 			{
 				return ENState::Falling;	
 			}
 			else
 			{
-				return ENState::ClimbingJump;
+				return ENState::ClimbJump;
 			}
-			
+		}
+
+		if(inputSubsystem->DashKeyPressed)
+		{
+			return ENState::ClimbSprint;
 		}
 	}
 
+	// 캐릭터가 바닥에 닿으면 OnGround 상태로 변경
 	FFindFloorResult floorResult;
 	Owner->GetCharacterMovement()->FindFloor(Owner->GetActorLocation(), floorResult, false);
 	if(floorResult.bWalkableFloor)
@@ -161,14 +174,14 @@ ENState UNStateClimbing::CheckTransition()
 	return Super::CheckTransition();
 }
 
-void UNStateClimbingJump::Init()
+void UNStateClimbJump::Init()
 {
 	Super::Init();
 
 	SetParent(ENState::OnWall);
 }
 
-void UNStateClimbingJump::OnEnter()
+void UNStateClimbJump::OnEnter()
 {
 	Super::OnEnter();
 
@@ -181,7 +194,7 @@ void UNStateClimbingJump::OnEnter()
 	}
 }
 
-void UNStateClimbingJump::OnLeave()
+void UNStateClimbJump::OnLeave()
 {
 	Super::OnLeave();
 
@@ -194,24 +207,78 @@ void UNStateClimbingJump::OnLeave()
 	}
 }
 
-ENState UNStateClimbingJump::CheckTransition()
+ENState UNStateClimbJump::CheckTransition()
 {
 	if(Duration > 0.3f)
 	{
-		return ENState::Climbing;
+		return ENState::ClimbMove;
 	}
 	
 	return Super::CheckTransition();
 }
 
-void UNStateClimbingEnd::Init()
+void UNStateClimbSprint::Init()
 {
 	Super::Init();
 
 	SetParent(ENState::OnWall);
 }
 
-void UNStateClimbingEnd::OnEnter()
+void UNStateClimbSprint::OnEnter()
+{
+	Super::OnEnter();
+
+	if(Owner)
+	{
+		// FRotator newrotation = Owner->GetActorRotation();
+		// newrotation.Pitch = 90.0f;
+		// Owner->SetActorRotation(newrotation);
+
+		Owner->GetCharacterMovement()->MaxFlySpeed = 700.f;
+	}
+}
+
+void UNStateClimbSprint::OnLeave()
+{
+	Super::OnLeave();
+
+	if(Owner)
+	{
+		// FRotator newrotation = Owner->GetActorRotation();
+		// newrotation.Pitch = 0.0f;
+		// Owner->SetActorRotation(newrotation);
+		
+		Owner->GetCharacterMovement()->MaxFlySpeed = 200.f;
+	}
+}
+
+ENState UNStateClimbSprint::CheckTransition()
+{
+	if(!Owner)
+	{
+		return ENState::None;
+	}
+
+	if(auto inputSubsystem = Owner->GetGameInstance()->GetSubsystem<UNInputSubsystem>())
+	{
+		// 방향키를 떼면 다시 등반 상태로 변경
+		if(inputSubsystem->MovementVector.IsNearlyZero())
+		{
+			return ENState::ClimbMove;
+		}
+	}
+	
+	return Super::CheckTransition();
+}
+
+void UNStateClimbEnd::Init()
+{
+	Super::Init();
+
+	SetParent(ENState::OnWall);
+}
+
+void UNStateClimbEnd::OnEnter()
 {
 	Super::OnEnter();
 
@@ -222,7 +289,7 @@ void UNStateClimbingEnd::OnEnter()
 	}
 }
 
-ENState UNStateClimbingEnd::CheckTransition()
+ENState UNStateClimbEnd::CheckTransition()
 {
 	if(Duration > 0.5f)
 	{

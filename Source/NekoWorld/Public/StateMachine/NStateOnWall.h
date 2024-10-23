@@ -21,7 +21,7 @@ public:
 };
 
 UCLASS()
-class UNStateClimbingStart : public UNStateBase
+class UNStateClimbStart : public UNStateBase
 {
 	GENERATED_BODY()
 
@@ -34,7 +34,7 @@ public:
 
 
 UCLASS()
-class UNStateClimbing : public UNStateBase
+class UNStateClimbMove : public UNStateBase
 {
 	GENERATED_BODY()
 
@@ -44,7 +44,7 @@ public:
 };
 
 UCLASS()
-class UNStateClimbingJump : public UNStateBase
+class UNStateClimbJump : public UNStateBase
 {
 	GENERATED_BODY()
 
@@ -56,7 +56,19 @@ public:
 };
 
 UCLASS()
-class UNStateClimbingEnd : public UNStateBase
+class UNStateClimbSprint : public UNStateBase
+{
+	GENERATED_BODY()
+
+public:
+	virtual void Init() override;
+	virtual void OnEnter() override;
+	virtual void OnLeave() override;
+	virtual ENState CheckTransition() override;
+};
+
+UCLASS()
+class UNStateClimbEnd : public UNStateBase
 {
 	GENERATED_BODY()
 

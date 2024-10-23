@@ -51,10 +51,11 @@ void UNStateMachineComponent::RegisterState()
 	StateClassMap.Add(ENState::Sliding, UNStateSliding::StaticClass());
 
 	StateClassMap.Add(ENState::OnWall, UNStateOnWall::StaticClass());
-	StateClassMap.Add(ENState::ClimbingStart, UNStateClimbingStart::StaticClass());
-	StateClassMap.Add(ENState::Climbing, UNStateClimbing::StaticClass());
-	StateClassMap.Add(ENState::ClimbingJump, UNStateClimbingJump::StaticClass());
-	StateClassMap.Add(ENState::ClimbingEnd, UNStateClimbingEnd::StaticClass());
+	StateClassMap.Add(ENState::ClimbStart, UNStateClimbStart::StaticClass());
+	StateClassMap.Add(ENState::ClimbMove, UNStateClimbMove::StaticClass());
+	StateClassMap.Add(ENState::ClimbJump, UNStateClimbJump::StaticClass());
+	StateClassMap.Add(ENState::ClimbSprint, UNStateClimbSprint::StaticClass());
+	StateClassMap.Add(ENState::ClimbEnd, UNStateClimbEnd::StaticClass());
 	
 	StateClassMap.Add(ENState::OnAir, UNStateOnAir::StaticClass());
 	StateClassMap.Add(ENState::Jump, UNStateJump::StaticClass());

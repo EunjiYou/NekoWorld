@@ -84,9 +84,6 @@ public:
 	virtual void Init() override;
 	virtual void OnUpdate(float DeltaTime) override;
 	virtual ENState CheckTransition() override;
-
-public:
-	float Duration;
 };
 
 UCLASS()
