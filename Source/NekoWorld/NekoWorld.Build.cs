@@ -11,7 +11,7 @@ public class NekoWorld : ModuleRules
 		PublicDependencyModuleNames.AddRange(new string[]
         {
             "Core", "CoreUObject", "Engine", "InputCore",
-            "EnhancedInput"
+            "EnhancedInput", "MotionWarping"
         });
 
 		PrivateDependencyModuleNames.AddRange(new string[]
