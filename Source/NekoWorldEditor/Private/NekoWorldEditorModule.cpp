@@ -11,8 +11,10 @@ IMPLEMENT_MODULE(FNekoWorldEditorModule, NekoWorldEditor);
 
 void FNekoWorldEditorModule::StartupModule()
 {
-	FLevelEditorModule& LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>(TEXT("LevelEditor"));
-	DeferredStartDelegateHandle = LevelEditorModule.OnTabManagerChanged().AddRaw(this, &FNekoWorldEditorModule::OnTabManagerChanged);
+	// 강제 EditorUtilityWidget Register. 위젯 옵션으로 가능하여 주석 처리함
+	// FLevelEditorModule& LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>(TEXT("LevelEditor"));
+	// DeferredStartDelegateHandle = LevelEditorModule.OnLevelEditorCreated().AddRaw(this, &FNekoWorldEditorModule::OnLevelEditorCreated);
+	// DeferredStartDelegateHandle = LevelEditorModule.OnTabManagerChanged().AddRaw(this, &FNekoWorldEditorModule::OnTabManagerChanged);
 }
 
 void FNekoWorldEditorModule::ShutdownModule()
@@ -28,7 +30,19 @@ void FNekoWorldEditorModule::OnTabManagerChanged()
 {
 	FLevelEditorModule& LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>(TEXT("LevelEditor"));
 	LevelEditorModule.OnTabManagerChanged().Remove(DeferredStartDelegateHandle);
+	
+	if(UEditorUtilitySubsystem* editorUtilitySubsystem = GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>())
+	{
+		UEditorUtilityWidgetBlueprint* widget = LoadObject<UEditorUtilityWidgetBlueprint>(NULL, TEXT("/Game/Blueprint/UI_StateMachineViewer.UI_StateMachineViewer"), NULL, LOAD_None, NULL);
+		editorUtilitySubsystem->RegisterTabAndGetID(widget, StateMachineViewerTabId);
+	}
+}
 
+void FNekoWorldEditorModule::OnLevelEditorCreated(TSharedPtr<ILevelEditor> InLevelEditor)
+{
+	FLevelEditorModule& LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>(TEXT("LevelEditor"));
+	LevelEditorModule.OnLevelEditorCreated().Remove(DeferredStartDelegateHandle);
+	
 	if(UEditorUtilitySubsystem* editorUtilitySubsystem = GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>())
 	{
 		UEditorUtilityWidgetBlueprint* widget = LoadObject<UEditorUtilityWidgetBlueprint>(NULL, TEXT("/Game/Blueprint/UI_StateMachineViewer.UI_StateMachineViewer"), NULL, LOAD_None, NULL);

@@ -6,6 +6,8 @@
 #include "Modules/ModuleInterface.h"
 #include "Modules/ModuleManager.h"
 
+class ILevelEditor;
+
 class FNekoWorldEditorModule : public IModuleInterface
 {
 public:
@@ -13,6 +15,7 @@ public:
 	virtual void ShutdownModule() override;
 
 	void OnTabManagerChanged();
+	void OnLevelEditorCreated(TSharedPtr<ILevelEditor> InLevelEditor);
 
 public:
 	FDelegateHandle DeferredStartDelegateHandle;
