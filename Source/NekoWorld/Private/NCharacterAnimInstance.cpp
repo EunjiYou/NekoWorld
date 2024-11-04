@@ -28,4 +28,6 @@ void UNCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		CurCharacterState = stateMachineComp->CurStateObj? stateMachineComp->CurStateObj->MyState : ENState::None;
 	}
 	MoveSpeed = OwnerCharacter->GetCharacterMovement()->MaxWalkSpeed;
+
+	ClimbMoveDir = OwnerCharacter->MoveVector;
 }

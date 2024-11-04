@@ -29,7 +29,9 @@ struct FNStateTransitionData
 
 	FNStateTransitionData()
 		: DashCount(0)
-	{}
+		, HitWall_OnMoveForward(false)
+	{
+	}
 
 	UPROPERTY(VisibleAnywhere)
 	int DashCount;

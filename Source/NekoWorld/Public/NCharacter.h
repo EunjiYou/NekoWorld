@@ -44,6 +44,9 @@ private:
 public:
 	UPROPERTY()
 	UNCharacterAnimInstance* NAnimInstance;
+
+	UPROPERTY()
+	FVector MoveVector;
 	
 private:
 	UPROPERTY(VisibleAnywhere)
@@ -57,7 +60,4 @@ private:
 
 	UPROPERTY()
 	UNCharacterMovementComponent* NCharacterMovementComponent;
-	
-	UPROPERTY()
-	FVector MoveVector;
 };

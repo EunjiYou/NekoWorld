@@ -11,7 +11,6 @@
 #include "StateMachine/NStateMachineComponent.h"
 #include "SubSystem/NInputSubsystem.h"
 
-
 void UNStateOnWall::OnEnter()
 {
 	Super::OnEnter();
@@ -49,6 +48,8 @@ ENState UNStateOnWall::CheckTransition()
 	}
 	
 	// ClimbEnd Check
+	if(StateMachineComponent->GetCurState() != ENState::ClimbEnd
+		&& StateMachineComponent->GetCurState() != ENState::ClimbSprint)
 	{
 		float sphereRadius = 15.f;
 		auto traceStart = Owner->GetActorLocation() + FVector::UnitZ() * (Owner->GetCapsuleComponent()->GetScaledCapsuleHalfHeight() + sphereRadius);
@@ -56,7 +57,7 @@ ENState UNStateOnWall::CheckTransition()
 		// Trace를 쏘았을 때 벽이 있는 지를 체크한 결과로 StateMachine Transition Data 업데이트
 		TArray<AActor*> actorsToIgnore;
 		FHitResult hitResult;
-		UKismetSystemLibrary::SphereTraceSingle(GetWorld(),\
+		UKismetSystemLibrary::SphereTraceSingle(GetWorld(),
 			traceStart, traceEnd, sphereRadius,
 			// TraceChannel::ClimbCheck
 			ETraceTypeQuery::TraceTypeQuery3, false, actorsToIgnore, EDrawDebugTrace::ForDuration,
@@ -228,11 +229,12 @@ void UNStateClimbSprint::OnEnter()
 {
 	Super::OnEnter();
 
-	if(Owner)
+	if(Owner && StateMachineComponent)
 	{
-		// FRotator newrotation = Owner->GetActorRotation();
-		// newrotation.Pitch = 90.0f;
-		// Owner->SetActorRotation(newrotation);
+		FRotator newrotation = Owner->GetActorRotation();
+		// 90도 이상으로 돌릴 시 복귀 부분에 이슈가 있어서 임시로 고정
+		newrotation.Pitch = 85.f;
+		Owner->SetActorRotation(newrotation);
 
 		Owner->GetCharacterMovement()->MaxFlySpeed = 700.f;
 	}
@@ -242,13 +244,14 @@ void UNStateClimbSprint::OnLeave()
 {
 	Super::OnLeave();
 
-	if(Owner)
+	if(Owner && Owner->GetCharacterMovement())
 	{
-		// FRotator newrotation = Owner->GetActorRotation();
-		// newrotation.Pitch = 0.0f;
-		// Owner->SetActorRotation(newrotation);
-		
 		Owner->GetCharacterMovement()->MaxFlySpeed = 200.f;
+		{
+			FRotator newrotation = Owner->GetActorRotation();
+			newrotation.Pitch = 0.f;
+			Owner->SetActorRelativeRotation(newrotation);
+		}
 	}
 }
 
@@ -267,6 +270,21 @@ ENState UNStateClimbSprint::CheckTransition()
 			return ENState::ClimbMove;
 		}
 	}
+
+	// 캐릭터 발밑(조금 더 앞에서)에 등반 지형을 체크
+	FVector startLoc = Owner->GetActorLocation() - Owner->GetActorUpVector() * Owner->GetDefaultHalfHeight() + Owner->GetActorForwardVector() * Owner->GetCapsuleComponent()->GetScaledCapsuleRadius();
+	FVector endLoc = startLoc + -Owner->GetActorUpVector() * 20.0f;
+	TArray<AActor*> actorsToIgnore;
+	FHitResult hitResult;
+	UKismetSystemLibrary::SphereTraceSingle(GetWorld(),
+		startLoc, endLoc, 15.f,
+		// TraceChannel::ClimbCheck
+		ETraceTypeQuery::TraceTypeQuery3, false, actorsToIgnore, EDrawDebugTrace::ForDuration,
+		hitResult, true, FLinearColor::Green, FLinearColor::Red, 1.f );
+	if(!hitResult.bBlockingHit)
+	{
+		return ENState::OnGround;
+	}
 	
 	return Super::CheckTransition();
 }
@@ -278,20 +296,9 @@ void UNStateClimbEnd::Init()
 	SetParent(ENState::OnWall);
 }
 
-void UNStateClimbEnd::OnEnter()
-{
-	Super::OnEnter();
-
-	if(Owner)
-	{
-		// Todo : 모션 제대로 붙이고서 제거 필요
-		Owner->ClimbingJump(true);
-	}
-}
-
 ENState UNStateClimbEnd::CheckTransition()
 {
-	if(Duration > 0.5f)
+	if(Duration > 1.13f)
 	{
 		return ENState::OnGround;
 	}

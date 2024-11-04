@@ -19,6 +19,9 @@ class NEKOWORLD_API UNCharacterAnimInstance : public UAnimInstance
 public:
 	UPROPERTY(BlueprintReadOnly)
 	float MoveSpeed;
+
+	UPROPERTY(BlueprintReadOnly)
+	FVector ClimbMoveDir;
 	
 	UPROPERTY(BlueprintReadOnly)
 	ENState CurCharacterState;

@@ -98,9 +98,8 @@ void ANCharacter::OnInputMove(const FInputActionValue& Value)
 	{
 		// Controller 회전 방향 기준으로 InputVector만큼 이동
 		FVector moveVector = FRotationMatrix(FRotator(0.f, GetControlRotation().Yaw, 0.f)).TransformVector(FVector(inputVector.Y, inputVector.X, 0.f));
-		DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + (moveVector * 100.0f), FColor::Red, false, 1.0f);
 		MoveVector = moveVector;
-
+		
 		// 보간 회전 처리
 		if(NCharacterMovementComponent)
 		{
@@ -128,6 +127,8 @@ void ANCharacter::OnInputMove(const FInputActionValue& Value)
 		// 등반 중에는 Y,Z 축 이동
 		MoveVector = FVector(0.f, inputVector.X, inputVector.Y);		
 	}
+
+	DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + (MoveVector * 100.0f), FColor::Red, false, 1.0f);
 }
 
 void ANCharacter::OnInputLook(const FInputActionValue& Value)

@@ -74,6 +74,5 @@ class UNStateClimbEnd : public UNStateBase
 
 public:
 	virtual void Init() override;
-	virtual void OnEnter() override;
 	virtual ENState CheckTransition() override;
 };
