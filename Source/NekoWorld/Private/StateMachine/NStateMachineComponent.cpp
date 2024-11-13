@@ -60,6 +60,7 @@ void UNStateMachineComponent::RegisterState()
 	StateClassMap.Add(ENState::OnAir, UNStateOnAir::StaticClass());
 	StateClassMap.Add(ENState::Jump, UNStateJump::StaticClass());
 	StateClassMap.Add(ENState::Falling, UNStateFalling::StaticClass());
+	StateClassMap.Add(ENState::Gliding, UNStateGliding::StaticClass());
 }
 
 

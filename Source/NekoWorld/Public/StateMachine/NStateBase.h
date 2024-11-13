@@ -32,6 +32,7 @@ enum class ENState : uint8
 	OnAir,
 	Jump,
 	Falling,
+	Gliding,
 };
 
 UCLASS()

@@ -11,7 +11,7 @@ class ANCharacter;
 /**
  * 
  */
-UCLASS()
+UCLASS(Abstract)
 class NEKOWORLD_API UNAnimNotifyState : public UAnimNotifyState
 {
 	GENERATED_BODY()

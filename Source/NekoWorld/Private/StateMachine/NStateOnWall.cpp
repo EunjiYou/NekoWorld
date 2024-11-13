@@ -158,7 +158,7 @@ ENState UNStateClimbMove::CheckTransition()
 			}
 		}
 
-		if(inputSubsystem->DashKeyPressed)
+		if(inputSubsystem->ActionInputButton[(uint8)ENActionInputType::Dash])
 		{
 			return ENState::ClimbSprint;
 		}

@@ -34,6 +34,8 @@ private:
 	void SetActionInputButton(ENActionInputType action, bool isPressed);
 
 public:
+	// Action타입 Input류들의 Trigger 여부
+	// ENActionInputType enum 갯수만큼 생성됨
 	TBitArray<> ActionInputButton;
 	// InputActionButton에 대한 변경을 알려줄 Delegate 필요
 	FOnInputActionDel EventInputAction;
@@ -42,8 +44,6 @@ public:
 	FOnInputDel EventInputLook;
 	
 	FVector2D MovementVector;
-	bool JumpKeyPressed;
-	bool DashKeyPressed;
 	
 	bool IsRun = true;
 };

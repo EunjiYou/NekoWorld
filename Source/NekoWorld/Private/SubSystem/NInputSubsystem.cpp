@@ -93,9 +93,7 @@ void UNInputSubsystem::OnInputLook(const FInputActionValue& Value)
 
 void UNInputSubsystem::OnInputJump(const FInputActionValue& Value)
 {
-	JumpKeyPressed = Value.Get<bool>();
-
-	SetActionInputButton(ENActionInputType::Jump, JumpKeyPressed);
+	SetActionInputButton(ENActionInputType::Jump, Value.Get<bool>());
 }
 
 void UNInputSubsystem::OnInputWalkRunToggle(const FInputActionValue& Value)
@@ -105,9 +103,7 @@ void UNInputSubsystem::OnInputWalkRunToggle(const FInputActionValue& Value)
 
 void UNInputSubsystem::OnInputDash(const FInputActionValue& Value)
 {
-	DashKeyPressed = Value.Get<bool>();
-
-	SetActionInputButton(ENActionInputType::Dash, DashKeyPressed);
+	SetActionInputButton(ENActionInputType::Dash, Value.Get<bool>());
 }
 
 void UNInputSubsystem::OnInputClimbCancel(const FInputActionValue& Value)
