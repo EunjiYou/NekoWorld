@@ -16,7 +16,7 @@ ENState UNStateOnGround::CheckTransition()
 	
 	if(UNInputSubsystem* inputSubsystem = Owner->GetGameInstance()->GetSubsystem<UNInputSubsystem>())
 	{
-		if(inputSubsystem->ActionInputButton[(uint8)ENActionInputType::Jump])
+		if(inputSubsystem->IsActionInputPressed(ENActionInputType::Jump))
 		{
 			return ENState::Jump;
 		}
@@ -61,7 +61,7 @@ ENState UNStateIdle::CheckTransition()
 {
 	if(UNInputSubsystem* inputSubsystem = Owner->GetGameInstance()->GetSubsystem<UNInputSubsystem>())
 	{
-		if(inputSubsystem->ActionInputButton[(uint8)ENActionInputType::Dash])
+		if(inputSubsystem->IsActionInputPressed(ENActionInputType::Dash))
 		{
 			return ENState::DashStart;
 		}
@@ -86,7 +86,7 @@ ENState UNStateWalkRun::CheckTransition()
 {
 	if(UNInputSubsystem* inputSubsystem = Owner->GetGameInstance()->GetSubsystem<UNInputSubsystem>())
 	{
-		if(inputSubsystem->ActionInputButton[(uint8)ENActionInputType::Dash])
+		if(inputSubsystem->IsActionInputPressed(ENActionInputType::Dash))
 		{
 			return ENState::DashStart;
 		}

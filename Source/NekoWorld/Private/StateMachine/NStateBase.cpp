@@ -22,8 +22,8 @@ void UNStateBase::Init()
 
 void UNStateBase::OnEnter()
 {
-	HasCancelActionInput = false;
-	CancelActionInputs.Empty();
+	//HasCancelActionInput = false;
+	CancelActionInputs = 0;
 	ReceivedCancelAction = ENActionInputType::None;
 	Duration = 0.f;
 }

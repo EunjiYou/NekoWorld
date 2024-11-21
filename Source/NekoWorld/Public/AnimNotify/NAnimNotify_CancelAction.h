@@ -6,7 +6,6 @@
 #include "NAnimNotifyState.h"
 #include "NAnimNotify_CancelAction.generated.h"
 
-enum class ENActionInputType : uint8;
 /**
  * 
  */
@@ -20,6 +19,6 @@ public:
 	virtual void NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference) override;
 	
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	ENActionInputType ActionInputType;
+	UPROPERTY(EditAnywhere, Meta = (Bitmask, BitmaskEnum = "ENActionInputType"))
+	uint32 ActionInputType;
 };

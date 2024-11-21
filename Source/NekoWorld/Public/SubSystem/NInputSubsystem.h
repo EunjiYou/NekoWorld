@@ -6,7 +6,7 @@
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "NInputSubsystem.generated.h"
 
-enum class ENActionInputType : uint8;
+enum class ENActionInputType : uint32;
 struct FInputActionValue;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnInputDel, const FInputActionValue&);
@@ -18,10 +18,10 @@ class NEKOWORLD_API UNInputSubsystem : public UGameInstanceSubsystem
 	GENERATED_BODY()
 
 public:
-	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
-	
 	void RegisterInputMappingContext(const ULocalPlayer* LocalPlayer);
 	void BindInputAction(UInputComponent* PlayerInputComponent);
+
+	bool IsActionInputPressed(ENActionInputType action);
 
 private:
 	void OnInputMove(const FInputActionValue& Value);
@@ -36,7 +36,8 @@ private:
 public:
 	// Action타입 Input류들의 Trigger 여부
 	// ENActionInputType enum 갯수만큼 생성됨
-	TBitArray<> ActionInputButton;
+	UPROPERTY(Meta = (Bitmask, BitmaskEnum = "ENActionInputType"))
+	uint32 ActionInputButton = 0;
 	// InputActionButton에 대한 변경을 알려줄 Delegate 필요
 	FOnInputActionDel EventInputAction;
 	

@@ -7,12 +7,6 @@
 #include "InputMappingContext.h"
 #include "Common/CommonEnum.h"
 
-void UNInputSubsystem::Initialize(FSubsystemCollectionBase& Collection)
-{
-	Super::Initialize(Collection);
-
-	ActionInputButton.Init(false, (uint8)ENActionInputType::Max);
-}
 
 void UNInputSubsystem::RegisterInputMappingContext(const ULocalPlayer* LocalPlayer)
 {
@@ -80,6 +74,11 @@ void UNInputSubsystem::BindInputAction(UInputComponent* PlayerInputComponent)
 	}
 }
 
+bool UNInputSubsystem::IsActionInputPressed(ENActionInputType action)
+{
+	return ActionInputButton & static_cast<uint32>(action);
+}
+
 void UNInputSubsystem::OnInputMove(const FInputActionValue& Value)
 {
 	MovementVector = Value.Get<FVector2D>();
@@ -115,6 +114,13 @@ void UNInputSubsystem::OnInputClimbCancel(const FInputActionValue& Value)
 
 void UNInputSubsystem::SetActionInputButton(ENActionInputType action, bool isPressed)
 {
-	ActionInputButton[(uint8)action] = isPressed;
+	if(isPressed)
+	{
+		ActionInputButton |= static_cast<uint32>(action);	
+	}
+	else
+	{
+		ActionInputButton &= ~(static_cast<uint32>(action));
+	}
 	EventInputAction.Broadcast(action);
 }

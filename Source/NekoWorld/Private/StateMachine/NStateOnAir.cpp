@@ -30,7 +30,7 @@ ENState UNStateOnAir::CheckTransition()
 	{
 		if(UNInputSubsystem* inputSubsystem = Owner->GetGameInstance()->GetSubsystem<UNInputSubsystem>())
 		{
-			if(inputSubsystem->ActionInputButton[(uint8)ENActionInputType::Jump])
+			if(inputSubsystem->IsActionInputPressed(ENActionInputType::Jump))
 			{
 				// 둘 다 지형이 점프 높이보다 조오금 아래에 있는 경우만 Gliding으로 전환
 				FVector startPos = Owner->GetActorLocation() - FVector(0.f, 0.f, Owner->GetDefaultHalfHeight());
@@ -101,7 +101,7 @@ ENState UNStateJump::CheckTransition()
 	
 	if(UNInputSubsystem* inputSubsystem = Owner->GetGameInstance()->GetSubsystem<UNInputSubsystem>())
 	{	
-		if(inputSubsystem->ActionInputButton[(uint8)ENActionInputType::Jump])
+		if(inputSubsystem->IsActionInputPressed(ENActionInputType::Jump))
 		{
 			return ENState::None;
 		}
@@ -199,7 +199,7 @@ ENState UNStateGliding::CheckTransition()
 {
 	if(UNInputSubsystem* inputSubsystem = Owner->GetGameInstance()->GetSubsystem<UNInputSubsystem>())
 	{
-		if(inputSubsystem->ActionInputButton[(uint8)ENActionInputType::Jump])
+		if(inputSubsystem->IsActionInputPressed(ENActionInputType::Jump))
 		{
 			return ENState::Falling;
 		}

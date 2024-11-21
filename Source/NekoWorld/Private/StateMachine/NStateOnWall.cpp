@@ -139,13 +139,13 @@ ENState UNStateClimbMove::CheckTransition()
 	{
 		// 등반 취소 (등반 점프, 등반 완료에서는 캔슬이 되지 않음)
 		// X 키를 누르거나 방향키 밑 + 점프 누를 시 취소
-		if(inputSubsystem->ActionInputButton[(uint8)ENActionInputType::ClimbCancel])
+		if(inputSubsystem->IsActionInputPressed(ENActionInputType::ClimbCancel))
 		{
 			return ENState::Falling;
 		}
 
 		// 등반 점프 / 낙하 체크 
-		if(inputSubsystem->ActionInputButton[(uint8)ENActionInputType::Jump])
+		if(inputSubsystem->IsActionInputPressed(ENActionInputType::Jump))
 		{
 			// 방향키 누름 없이 점프 누르면 낙하
 			if(Owner->GetCharacterMovement()->GetPendingInputVector().Z < 0.f)
@@ -158,7 +158,7 @@ ENState UNStateClimbMove::CheckTransition()
 			}
 		}
 
-		if(inputSubsystem->ActionInputButton[(uint8)ENActionInputType::Dash])
+		if(inputSubsystem->IsActionInputPressed(ENActionInputType::Dash))
 		{
 			return ENState::ClimbSprint;
 		}

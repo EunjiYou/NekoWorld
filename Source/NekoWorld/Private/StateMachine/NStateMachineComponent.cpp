@@ -192,9 +192,9 @@ UNStateBase* UNStateMachineComponent::GetState(ENState State)
 
 void UNStateMachineComponent::OnInputAction(const ENActionInputType actionInputType)
 {
-	if(CurStateObj && CurStateObj->HasCancelActionInput)
+	//if(CurStateObj && CurStateObj->HasCancelActionInput)
 	{
-		if(CurStateObj->CancelActionInputs.Contains(actionInputType))
+		if(IsValid(CurStateObj) && (CurStateObj->CancelActionInputs & static_cast<uint32>(actionInputType)))
 		{
 			CurStateObj->ReceivedCancelAction = actionInputType;
 		}

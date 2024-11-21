@@ -7,7 +7,7 @@
 #include "Components/ActorComponent.h"
 #include "NStateMachineComponent.generated.h"
 
-enum class ENActionInputType : uint8;
+enum class ENActionInputType : uint32;
 enum class ENState : uint8;
 class UNStateBase;
 

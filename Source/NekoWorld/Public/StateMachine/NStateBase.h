@@ -5,7 +5,8 @@
 #include "CoreMinimal.h"
 #include "NStateBase.generated.h"
 
-enum class ENActionInputType : uint8;
+enum class ENActionInputType : uint32;
+
 class ANCharacter;
 class UNStateMachineComponent;
 
@@ -51,10 +52,10 @@ public:
 
 	void SetParent(ENState ParentState);
 
-	void SetInputCancelAction(ENActionInputType actionInputType)
+	void SetInputCancelAction(UPARAM(Meta=(Bitmask, BitmaskEnum = "ENActionInputType")) uint32 actionInputType)
 	{
-		HasCancelActionInput = true;
-		CancelActionInputs.AddUnique(actionInputType);
+		//HasCancelActionInput = true;
+		CancelActionInputs |= actionInputType;
 	}
 
 public:
@@ -63,8 +64,9 @@ public:
 	float Duration;
 	
 	// 이 State를 Cancel할 수 있는 입력 타입. CancelActionNotify로부터 세팅됨
-	bool HasCancelActionInput;
-	TArray<ENActionInputType> CancelActionInputs;
+	//bool HasCancelActionInput;
+	UPROPERTY(Meta = (Bitmask, BitmaskEnum = "ENActionInputType"))
+	uint32 CancelActionInputs;
 
 	// CancelActionInputs 중 이 State가 받은 입력 타입. 한 Tick에 입력이 여러개가 들어왔을 경우 맨 마지막 입력으로 세팅한다. 
 	ENActionInputType ReceivedCancelAction;
