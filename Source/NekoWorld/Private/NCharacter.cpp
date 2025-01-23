@@ -119,7 +119,8 @@ void ANCharacter::OnInputMove(const FInputActionValue& Value)
 				hitResult, true, FLinearColor::Green, FLinearColor::Red, 1.f );
 
 			// Trace 결과로 등반 가능한 지를 체크하여 State Transition Data로 세팅
-			StateMachineComponent->TransitionData.HitWall_OnMoveForward = IsClimbable(hitResult);			
+			StateMachineComponent->TransitionData.HitWall_OnMoveForward = IsClimbable(hitResult);
+			StateMachineComponent->TransitionData.HitWall_Normal = hitResult.ImpactNormal;
 		}
 	}
 	else

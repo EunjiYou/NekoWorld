@@ -7,6 +7,7 @@
 #include "Common/CommonEnum.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "StateMachine/NStateMachineComponent.h"
 #include "SubSystem/NInputSubsystem.h"
@@ -24,6 +25,13 @@ void UNStateOnWall::OnEnter()
 
 		// 발 밑 지형을 판단하기 위해 기준을 낮게 잡아둠. 계단 걷기 때에 영향을 줄 값이라 원상태로 복구 필요
 		Owner->GetCharacterMovement()->MaxStepHeight = 10.0f;
+
+		// 등반 시 캐릭터 각도를 벽 맞은 편으로 보정. 추후 등반 중 계속 벽면을 체크하여 보정하게 될 수 있음
+		if(StateMachineComponent)
+		{
+			auto desireRotation = UKismetMathLibrary::MakeRotFromXZ(-StateMachineComponent->TransitionData.HitWall_Normal, FVector::UpVector);
+			Owner->SetActorRotation(desireRotation);
+		}
 	}
 }
 
@@ -144,7 +152,7 @@ ENState UNStateClimbMove::CheckTransition()
 			return ENState::Falling;
 		}
 
-		// 등반 점프 / 낙하 체크 
+		// 등반 점프 / 낙하 체크
 		if(inputSubsystem->IsActionInputPressed(ENActionInputType::Jump))
 		{
 			// 방향키 누름 없이 점프 누르면 낙하
@@ -231,11 +239,10 @@ void UNStateClimbSprint::OnEnter()
 
 	if(Owner && StateMachineComponent)
 	{
-		FRotator newrotation = Owner->GetActorRotation();
-		// 90도 이상으로 돌릴 시 복귀 부분에 이슈가 있어서 임시로 고정
-		newrotation.Pitch = 85.f;
-		Owner->SetActorRotation(newrotation);
-
+		// 등반 질주를 위한 Pitch 각도 조정. 명조를 보았을 때 실제 각도는 90도보다 적거나, 모션으로 대체될 수도 있음..
+		FQuat NewRotation = FQuat::MakeFromEuler(FVector(0, 90, 0));
+		Owner->SetActorRotation(NewRotation);
+		
 		Owner->GetCharacterMovement()->MaxFlySpeed = 700.f;
 	}
 }
@@ -247,11 +254,10 @@ void UNStateClimbSprint::OnLeave()
 	if(Owner && Owner->GetCharacterMovement())
 	{
 		Owner->GetCharacterMovement()->MaxFlySpeed = 200.f;
-		{
-			FRotator newrotation = Owner->GetActorRotation();
-			newrotation.Pitch = 0.f;
-			Owner->SetActorRelativeRotation(newrotation);
-		}
+
+		// 등반 질주 시작 시의 pitch 조정을 reset
+		FQuat NewRotation = FQuat::MakeFromEuler(FVector::ZeroVector);
+		Owner->SetActorRotation(NewRotation);
 	}
 }
 

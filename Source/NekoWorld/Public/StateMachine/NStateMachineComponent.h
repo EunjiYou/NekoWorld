@@ -38,6 +38,8 @@ struct FNStateTransitionData
 	
 	UPROPERTY(VisibleAnywhere)
 	bool HitWall_OnMoveForward;
+	UPROPERTY(VisibleAnywhere)
+	FVector HitWall_Normal;
 	
 	float GetClimbStartAngle() { return 80.0f; }
 	float GetClimbCancelAngle() { return 110.0f; }
