@@ -51,6 +51,7 @@ struct FNStateData
 	GENERATED_BODY()
 
 	float GetClimbJumpSpeed() { return 500.0f; }
+	float FallingSpeed = 100.f;
 };
 
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnStateChangeDel, ENState, ENState); // CurState, NextState

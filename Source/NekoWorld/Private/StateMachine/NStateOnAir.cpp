@@ -25,7 +25,8 @@ ENState UNStateOnAir::CheckTransition()
 	{
 		return ENState::Idle;
 	}
-	
+
+	// Falling -> Gliding 전환 체크
 	if(StateMachineComponent->GetCurState() == ENState::Falling)
 	{
 		if(UNInputSubsystem* inputSubsystem = Owner->GetGameInstance()->GetSubsystem<UNInputSubsystem>())
@@ -65,6 +66,7 @@ void UNStateJump::OnEnter()
 {
 	Super::OnEnter();
 
+	// 점프 상태 전환을 위한 정점 체크
 	CharacterReachedJumpApex = false;
 	Owner->GetCharacterMovement()->bNotifyApex = true;
 	Owner->OnReachedJumpApex.AddDynamic(this, &UNStateJump::OnReachedJumpApex);
@@ -82,40 +84,19 @@ void UNStateJump::OnLeave()
 
 ENState UNStateJump::CheckTransition()
 {
-	if(!Owner)
+	if(!Owner)	
 	{
 		return ENState::None;
 	}
 
+	// Jump -> Falling 전환
 	if(CharacterReachedJumpApex)
 	{
 		return ENState::Falling;
 	}
-	
-	if(Owner->GetCharacterMovement()
-	&& Owner->GetCharacterMovement()->MovementMode == EMovementMode::MOVE_Falling)
-	{
-		return ENState::None;
-	}
-	
-	
-	if(UNInputSubsystem* inputSubsystem = Owner->GetGameInstance()->GetSubsystem<UNInputSubsystem>())
-	{	
-		if(inputSubsystem->IsActionInputPressed(ENActionInputType::Jump))
-		{
-			return ENState::None;
-		}
 
-		if(inputSubsystem->MovementVector.IsNearlyZero())
-		{
-			return ENState::Idle;
-		}
-		else
-		{
-			return ENState::Run;
-		}
-	}
-
+	// Todo : 점프 중 Gliding으로의 전환?
+	
 	return ENState::None;
 }
 
@@ -142,44 +123,48 @@ void UNStateGliding::OnEnter()
 {
 	Super::OnEnter();
 
+	// MovementMode는 Falling 상태를 유지하고, 중력을 변경시켜 서서히 하강하도록 한다
 	if(Owner && Owner->GetCharacterMovement())
 	{
 		Owner->GetCharacterMovement()->Velocity = FVector::ZeroVector;
 		Owner->GetCharacterMovement()->GravityScale = 0.01f;
 		// Owner->GetCharacterMovement()->AirControl = 0.7f;
-		Owner->GetCharacterMovement()->RotationRate = FRotator(0.f, 200.f, 0.f);
+		Owner->GetCharacterMovement()->RotationRate = FRotator(0.f, 100.f, 0.f);
 	}
 }
 
 void UNStateGliding::OnUpdate(float DeltaTime)
 {
 	Super::OnUpdate(DeltaTime);
-
-	if(Owner && Owner->GetCharacterMovement())
+	
+	if(Owner && Owner->GetCharacterMovement() && StateMachineComponent)
 	{
-		//Owner->AddMovementInput(Owner->GetActorForwardVector());
-		float dotProduct = FVector::DotProduct(Owner->MoveVector, Owner->GetActorForwardVector());
-		UKismetSystemLibrary::PrintString(GetWorld(), FString::SanitizeFloat(dotProduct));
 		auto glidingMoveVector = Owner->MoveVector;
-		if(dotProduct < -0.7f)
+
+		// 극단적인 방향 회전에 대해 원신처럼 약간의 회전 보정을 진행 (naturalTurning)
+		float dotProduct = FVector::DotProduct(Owner->MoveVector, Owner->GetActorForwardVector());
+		float naturalTurningStartAngle = FMath::Cos(FMath::DegreesToRadians(120.f));
+		float naturalTurningEndAngle = FMath::Cos(FMath::DegreesToRadians(60.f));
+		if(Owner->MoveVector.IsNearlyZero())
 		{
-			IsDirectionalTurning = true;
-			glidingMoveVector += Owner->GetActorForwardVector() * 0.5f;
-			DrawDebugLine(GetWorld(), Owner->GetActorLocation(), Owner->GetActorLocation() + (Owner->GetActorForwardVector() * 100.0f), FColor::Orange, false, 1.0f);
+			IsNaturalTurning = false;	
 		}
-		else if(dotProduct < 0.f && IsDirectionalTurning)
+		else if(dotProduct < naturalTurningStartAngle	// 회전 각도가 StartAngle로부터 시작해서 EndAngle 구간에 있는 경우만
+			|| (dotProduct < naturalTurningEndAngle && IsNaturalTurning))
 		{
-			glidingMoveVector += Owner->GetActorForwardVector() * 0.5f;
-			DrawDebugLine(GetWorld(), Owner->GetActorLocation(), Owner->GetActorLocation() + (Owner->GetActorForwardVector() * 100.0f), FColor::Orange, false, 1.0f);
+			IsNaturalTurning = true;
+			glidingMoveVector += Owner->GetActorForwardVector() * 0.5f;		// 앞을 누르지 않았어도 약간 앞으로 나가는 듯한 힘을 추가
+			// DrawDebugLine(GetWorld(), Owner->GetActorLocation(), Owner->GetActorLocation() + (Owner->GetActorForwardVector() * 100.0f), FColor::Orange, false, 1.0f);
 		}
 		else
 		{
-			IsDirectionalTurning = false;
+			IsNaturalTurning = false;
 		}
-		
-		const float FallingSpeed = 100.f;
-		Owner->GetCharacterMovement()->Velocity.X = glidingMoveVector.X * FallingSpeed;
-		Owner->GetCharacterMovement()->Velocity.Y = glidingMoveVector.Y * FallingSpeed;
+	
+		// Falling 상태에서는 MoveVector 입력이 없다고 Velocity 리셋이 되지 않으므로 현재 입력 값에 따른 Velocity 조절 필요 
+		const float fallingSpeed = StateMachineComponent->StateData.FallingSpeed;
+		Owner->GetCharacterMovement()->Velocity.X = glidingMoveVector.X * fallingSpeed;
+		Owner->GetCharacterMovement()->Velocity.Y = glidingMoveVector.Y * fallingSpeed;
 	}
 }
 
@@ -190,7 +175,7 @@ void UNStateGliding::OnLeave()
 	if(Owner && Owner->GetCharacterMovement())
 	{
 		Owner->GetCharacterMovement()->GravityScale = 1.f;
-		Owner->GetCharacterMovement()->AirControl = 0.05f;
+		// Owner->GetCharacterMovement()->AirControl = 0.05f;
 		Owner->GetCharacterMovement()->RotationRate = FRotator(0.f, 1500.f, 0.f);
 	}
 }

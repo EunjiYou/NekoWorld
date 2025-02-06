@@ -53,5 +53,5 @@ public:
 	virtual ENState CheckTransition() override;
 
 private:
-	bool IsDirectionalTurning;
+	bool IsNaturalTurning;
 };
