@@ -4,8 +4,21 @@
 #include "StateMachine/NStateMachineComponent.h"
 #include "Common/CommonEnum.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/PhysicsVolume.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "SubSystem/NInputSubsystem.h"
 
+
+void UNStateOnGround::OnEnter()
+{
+	Super::OnEnter();
+	
+	// Todo : OnGround 자식 상태 진입 시 호출해줘야함! (State 전반적으로 Parent OnEnter/OnLeave 호출 여부 개발 필요)
+
+	// OnWall 상태같은 곳에서 복귀했을 때를 위해 MovementMode 세팅
+	Owner->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+	Owner->GetCharacterMovement()->RotationRate = FRotator(0.f, StateMachineComponent? StateMachineComponent->StateData.GroundRotationRateYaw : 100.f, 0.f);
+}
 
 ENState UNStateOnGround::CheckTransition()
 {
@@ -18,14 +31,61 @@ ENState UNStateOnGround::CheckTransition()
 	{
 		if(inputSubsystem->IsActionInputPressed(ENActionInputType::Jump))
 		{
-			return ENState::Jump;
+			// 지면에서 점프 키 입력 시 다이빙 가능 여부 체크. 아닌 경우는 Jump 상태로 넘김
+			FVector startPos = Owner->GetActorLocation() + (Owner->GetActorForwardVector() * 100.f);
+			FVector endPos = startPos + (Owner->GetActorUpVector() * -500.f);
+			TArray<FHitResult> hitResults;
+			TArray<AActor*> actorsToIgnore;
+			UKismetSystemLibrary::LineTraceMulti(GetWorld(),
+				startPos, endPos,
+				// Visibility
+				TraceTypeQuery1, false, actorsToIgnore, EDrawDebugTrace::ForDuration,
+				hitResults, true, FLinearColor::Red, FLinearColor::Green, 1.f);
+
+			auto hitResultNum = hitResults.Num();
+			// 아무것도 안 걸렸으면 점프로 전환
+			if(hitResultNum == 0)
+			{
+				return ENState::Jump;
+			}
+
+			// 0번째(가장 먼저 닿은 Actor)가 물이여야 한다는 전제로 체크
+			auto waterVolume = Cast<APhysicsVolume>(hitResults[0].GetActor());
+			if(!waterVolume || !waterVolume->bWaterVolume)
+			{
+				return ENState::Jump;
+			}
+
+			// 물 외에 닿은 게 없으면 다이빙 가능한 수면으로 생각하고 다이빙으로 넘김
+			if(hitResultNum == 1)
+			{
+				return ENState::Diving;
+			}
+
+			// 물 - 지면 차가 다이빙 가능 높이만큼은 되면 다이빙으로 전환
+			float diveableHeight = 100.f;
+			float waterHeight = hitResults[0].GetActor()->GetActorLocation().Z - hitResults[1].GetActor()->GetActorLocation().Z;
+			if(diveableHeight < waterHeight)
+			{
+				return ENState::Diving;
+			}
+			else
+			{
+				return ENState::Jump;
+			}
 		}
 	}
 
-	if(Owner->GetCharacterMovement()
-	&& Owner->GetCharacterMovement()->MovementMode == EMovementMode::MOVE_Falling)
+	if(Owner->GetCharacterMovement())
 	{
-		return ENState::Falling;
+		if(Owner->GetCharacterMovement()->IsFalling())
+		{
+			return ENState::Falling;
+		}
+		else if(Owner->GetCharacterMovement()->IsSwimming())
+		{
+			return ENState::OnWater;
+		}
 	}
 	
 	if(Owner && Owner->GetCharacterMovement())

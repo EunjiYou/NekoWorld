@@ -37,6 +37,7 @@ class UNStateFalling : public UNStateBase
 	
 public:
 	virtual void Init() override;
+	virtual void OnEnter() override;
 };
 
 UCLASS()
@@ -54,4 +55,14 @@ public:
 
 private:
 	bool IsNaturalTurning;
+};
+
+UCLASS()
+class UNStateDiving : public UNStateBase
+{
+	GENERATED_BODY()
+
+public:
+	virtual void Init() override;
+	virtual void OnEnter() override;
 };

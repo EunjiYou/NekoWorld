@@ -8,6 +8,7 @@
 #include "StateMachine/NStateOnAir.h"
 #include "StateMachine/NStateOnGround.h"
 #include "StateMachine/NStateOnWall.h"
+#include "StateMachine/NStateOnWater.h"
 #include "SubSystem/NInputSubsystem.h"
 
 
@@ -61,6 +62,12 @@ void UNStateMachineComponent::RegisterState()
 	StateClassMap.Add(ENState::Jump, UNStateJump::StaticClass());
 	StateClassMap.Add(ENState::Falling, UNStateFalling::StaticClass());
 	StateClassMap.Add(ENState::Gliding, UNStateGliding::StaticClass());
+	StateClassMap.Add(ENState::Diving, UNStateDiving::StaticClass());
+
+	StateClassMap.Add(ENState::OnWater, UNStateOnWater::StaticClass());
+	StateClassMap.Add(ENState::Swimming, UNStateSwimming::StaticClass());
+	StateClassMap.Add(ENState::SwimmingSprint, UNStateSwimmingSprint::StaticClass());
+	StateClassMap.Add(ENState::DivingEnd, UNStateDivingEnd::StaticClass());
 }
 
 
@@ -128,11 +135,11 @@ void UNStateMachineComponent::SetState(ENState NewState)
 	{
 		return;
 	}
-
-	// 현재 State에 대한 종료 처리
+	
 	if(CurStateObj)
 	{
 		auto newStateParents = GetAllParentState(NewState);
+		// 현재 State에 대한 종료 처리 (NewState 부모가 아닐 경우에만)
 		if(!newStateParents.Contains(GetCurState()))
 		{
 			CurStateObj->OnLeave();

@@ -11,6 +11,7 @@ class UNStateOnGround : public UNStateBase
 	GENERATED_BODY()
 
 public:
+	virtual void OnEnter() override;
 	virtual ENState CheckTransition() override;
 };
 
@@ -64,6 +65,7 @@ public:
 	virtual void Init() override;
 };
 
+// DashCount에 따른 상태 변화를 위해 Dash 상태를 분리 (StateMachineComponent->TransitionData.DashCount 참고)
 UCLASS()
 class UNStateDashStart : public UNStateBase
 {

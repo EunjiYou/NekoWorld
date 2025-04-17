@@ -20,10 +20,16 @@ ENState UNStateOnAir::CheckTransition()
     	return ENState::OnWall;
     }
 
-	if(Owner->GetCharacterMovement()
-	&& Owner->GetCharacterMovement()->MovementMode != EMovementMode::MOVE_Falling)
+	if(Owner->GetCharacterMovement())
 	{
-		return ENState::Idle;
+		if(Owner->GetCharacterMovement()->IsSwimming())
+		{
+			return ENState::OnWater;
+		}
+		else if(!Owner->GetCharacterMovement()->IsFalling())
+		{
+			return ENState::Idle;
+		}
 	}
 
 	// Falling -> Gliding 전환 체크
@@ -112,6 +118,17 @@ void UNStateFalling::Init()
 	SetParent(ENState::OnAir);
 }
 
+void UNStateFalling::OnEnter()
+{
+	Super::OnEnter();
+
+	// 등반 등의 상태에서 돌아올 경우 Flying Movement 상태일 때가 있어서 전환
+	if(Owner->GetCharacterMovement())
+	{
+		Owner->GetCharacterMovement()->SetMovementMode(MOVE_Falling);
+	}
+}
+
 void UNStateGliding::Init()
 {
 	Super::Init();
@@ -128,7 +145,6 @@ void UNStateGliding::OnEnter()
 	{
 		Owner->GetCharacterMovement()->Velocity = FVector::ZeroVector;
 		Owner->GetCharacterMovement()->GravityScale = 0.01f;
-		// Owner->GetCharacterMovement()->AirControl = 0.7f;
 		Owner->GetCharacterMovement()->RotationRate = FRotator(0.f, 100.f, 0.f);
 	}
 }
@@ -176,7 +192,7 @@ void UNStateGliding::OnLeave()
 	{
 		Owner->GetCharacterMovement()->GravityScale = 1.f;
 		// Owner->GetCharacterMovement()->AirControl = 0.05f;
-		Owner->GetCharacterMovement()->RotationRate = FRotator(0.f, 1500.f, 0.f);
+		// Owner->GetCharacterMovement()->RotationRate = FRotator(0.f, StateMachineComponent? StateMachineComponent->StateData.GroundRotationRateYaw : 100.f, 0.f);
 	}
 }
 
@@ -191,4 +207,19 @@ ENState UNStateGliding::CheckTransition()
 	}
 	
 	return Super::CheckTransition();
+}
+
+void UNStateDiving::Init()
+{
+	Super::Init();
+
+	SetParent(ENState::OnAir);
+}
+
+void UNStateDiving::OnEnter()
+{
+	Super::OnEnter();
+	
+	FVector JumpVelocity = Owner->GetActorForwardVector() * 300.0f + FVector::UnitZ() * 400.0f;
+	Owner->LaunchCharacter(JumpVelocity, true, true);
 }

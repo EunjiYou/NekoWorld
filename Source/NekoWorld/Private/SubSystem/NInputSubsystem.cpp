@@ -60,10 +60,12 @@ void UNInputSubsystem::BindInputAction(UInputComponent* PlayerInputComponent)
 	{
 		eiComp->BindAction(ia_WalkRunToggle, ETriggerEvent::Triggered, this, &UNInputSubsystem::OnInputWalkRunToggle);
 	}
-	
+
+	// Dash Trigger : Down
+	// 대시 키 입력, 해제 순간을 받기 위한 Trigger 세팅 
 	if(UInputAction* ia_Dash = Cast<UInputAction>(StaticLoadObject(UInputAction::StaticClass(), nullptr, TEXT("/Game/Blueprint/Input/Actions/IA_Dash.IA_Dash"))))
 	{
-		eiComp->BindAction(ia_Dash, ETriggerEvent::Triggered, this, &UNInputSubsystem::OnInputDash);
+		eiComp->BindAction(ia_Dash, ETriggerEvent::Started, this, &UNInputSubsystem::OnInputDash);
 		eiComp->BindAction(ia_Dash, ETriggerEvent::Completed, this, &UNInputSubsystem::OnInputDash);
 	}
 

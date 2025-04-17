@@ -52,6 +52,20 @@ struct FNStateData
 
 	float GetClimbJumpSpeed() { return 500.0f; }
 	float FallingSpeed = 100.f;
+	float SwimmingSpeed = 200.f;
+
+	float GroundRotationRateYaw = 1500.f;
+	
+	float MinVelocityZSwimming = -200.f; 
+	float MaxVelocityZSwimming = -50.f; 
+
+	float SpeedOnSwimming = 200.f;
+	float SpeedOnSwimmingSprint = 500.f;
+	float BrakingDecelerationSwimming = 300.f;
+	
+	// 데이터 교체 필요 항목
+	float DivingTraceCheckHeight = 500.f;
+	float DiveableHeight = 100.f;
 };
 
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnStateChangeDel, ENState, ENState); // CurState, NextState

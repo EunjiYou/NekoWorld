@@ -41,10 +41,8 @@ void UNStateOnWall::OnLeave()
 
 	if(Owner)
 	{
-		Owner->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
-		Owner->GetCharacterMovement()->bOrientRotationToMovement = true;
-		
 		Owner->GetCharacterMovement()->MaxStepHeight = 45.0f;
+		Owner->GetCharacterMovement()->bOrientRotationToMovement = true;
 	}
 }
 
@@ -53,6 +51,12 @@ ENState UNStateOnWall::CheckTransition()
 	if(!StateMachineComponent)
 	{
 		return ENState::None;
+	}
+
+	if(Owner->GetCharacterMovement()
+		&& Owner->GetCharacterMovement()->IsSwimming())
+	{
+		return ENState::OnWater;
 	}
 	
 	// ClimbEnd Check
